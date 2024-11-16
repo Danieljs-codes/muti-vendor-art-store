@@ -54,7 +54,7 @@ const fieldStyles = tv({
   slots: {
     description: "text-pretty text-sm/6 text-muted-fg sm:text-sm/6",
     label: "w-fit cursor-default font-medium text-secondary-fg text-sm",
-    fieldError: "text-sm/6 text-danger forced-colors:text-[Mark]",
+    fieldError: "text-sm/6 text-danger forced-colors:text-[Mark] leading-tight",
     input: [
       "w-full min-w-0 [&::-ms-reveal]:hidden bg-transparent py-2 px-2.5 text-sm text-fg placeholder-muted-fg outline-none focus:outline-none lg:text-sm"
     ]

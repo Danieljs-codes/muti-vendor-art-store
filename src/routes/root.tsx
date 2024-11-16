@@ -11,6 +11,7 @@ import {
 import { Meta, Scripts } from "@tanstack/start";
 import { type ReactNode, useEffect } from "react";
 import { toast as showToast } from "sonner";
+import { Toast } from "ui";
 
 export const Route = createRootRouteWithContext<{
 	queryClient: QueryClient;
@@ -61,7 +62,9 @@ function RootComponent() {
 
 	return (
 		<RootDocument>
-			<Outlet />
+			<ThemeProvider>
+				<Outlet />
+			</ThemeProvider>
 		</RootDocument>
 	);
 }
@@ -75,9 +78,10 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
 				<Meta />
 			</head>
 			<body>
-				<ThemeProvider>{children}</ThemeProvider>
+				{children}
 				<ScrollRestoration />
 				<Scripts />
+				<Toast />
 			</body>
 		</html>
 	);

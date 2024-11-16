@@ -48,7 +48,7 @@ const boxStyles = tv({
   base: "flex size-4 [&>[data-slot=icon]]:size-3 flex-shrink-0 items-center justify-center rounded border text-bg transition",
   variants: {
     isSelected: {
-      false: "border-toggle bg-secondary",
+      false: "border-toggle bg-bg",
       true: [
         "border-primary/70 bg-primary text-primary-fg",
         "group-invalid:border-danger/70 group-invalid:bg-danger group-invalid:text-danger-fg"

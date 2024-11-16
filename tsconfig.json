@@ -8,6 +8,7 @@
     "strictNullChecks": true,
     "paths": {
       "ui": ["./src/components/ui/index.ts"],
+      "@server/*": ["./src/server/*"],
       "@/*": ["./src/*"]
     }
   }

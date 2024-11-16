@@ -1,6 +1,8 @@
 import { Kysely, PostgresDialect } from "kysely";
-import { Pool } from "pg";
+import pg from "pg";
 import type { DB as Database } from "./types.ts"; // this is the Database interface we defined earlier
+
+const { Pool } = pg;
 
 const dialect = new PostgresDialect({
 	pool: new Pool({

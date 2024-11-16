@@ -42,6 +42,11 @@ model user {
   updatedAt     DateTime  @db.Date
   account       account[]
   session       session[]
+  artist        artist[]
+  cart          cart?
+  wishlist      wishlist?
+  order         order[]
+  review        review[]
 }
 
 model verification {
@@ -50,4 +55,143 @@ model verification {
   value      String
   expiresAt  DateTime  @db.Date
   createdAt  DateTime? @db.Date
+}
+
+model artist {
+  id                   String    @id
+  name                 String
+  bio                  String
+  portfolioUrl         String?
+  paystackSubAccountId String
+  createdAt            DateTime  @db.Date
+  updatedAt            DateTime  @db.Date
+  userId               String
+  user                 user      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  artwork              artwork[]
+}
+
+model artwork {
+  id          String      @id
+  title       String
+  description String
+  price       Float
+  imageUrls   String[]
+  createdAt   DateTime    @db.Date
+  updatedAt   DateTime    @db.Date
+  artistId    String
+  artist      artist      @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  orderItem   orderItem[]
+  cart        cart[]
+  wishlist    wishlist[]
+  discount    discount[]
+  review      review[]
+  category    category    @relation(fields: [categoryId], references: [id])
+  categoryId  String
+}
+
+model order {
+  id             String         @id
+  userId         String
+  user           user           @relation(fields: [userId], references: [id])
+  totalPrice     Float
+  status         OrderStatus
+  shippingStatus ShippingStatus @default(PENDING)
+  createdAt      DateTime       @db.Date
+  updatedAt      DateTime       @db.Date
+  orderItem      orderItem[]
+}
+
+model orderItem {
+  id             String    @id
+  orderId        String
+  order          order     @relation(fields: [orderId], references: [id])
+  artworkId      String
+  artwork        artwork   @relation(fields: [artworkId], references: [id])
+  quantity       Int
+  price          Decimal   @db.Decimal(10, 2) // Original price
+  discountId     String? // Reference to applied discount if any
+  discount       discount? @relation(fields: [discountId], references: [id])
+  discountAmount Decimal?  @db.Decimal(10, 2) // Amount saved from discount
+  finalPrice     Decimal   @db.Decimal(10, 2) // Price after discount
+  platformFee    Decimal   @db.Decimal(10, 2)
+  createdAt      DateTime  @db.Date
+  updatedAt      DateTime  @db.Date
+
+  @@index([orderId])
+  @@index([artworkId])
+  @@index([discountId])
+}
+
+model cart {
+  id        String    @id
+  userId    String    @unique
+  user      user      @relation(fields: [userId], references: [id])
+  artworks  artwork[]
+  createdAt DateTime  @db.Date
+  updatedAt DateTime  @db.Date
+}
+
+model discount {
+  id          String      @id
+  code        String      @unique
+  description String
+  percentage  Float
+  startDate   DateTime    @db.Date
+  endDate     DateTime    @db.Date
+  minAmount   Float? // Minimum order amount for discount to apply
+  maxUses     Int? // Maximum number of times the discount can be used
+  usedCount   Int         @default(0) // Track how many times code has been used
+  isActive    Boolean     @default(true) // Whether the discount is currently active
+  artworks    artwork[]
+  createdAt   DateTime    @db.Date
+  updatedAt   DateTime    @db.Date
+  orderItem   orderItem[]
+}
+
+model wishlist {
+  id        String    @id
+  userId    String    @unique
+  user      user      @relation(fields: [userId], references: [id])
+  artworks  artwork[]
+  createdAt DateTime  @db.Date
+  updatedAt DateTime  @db.Date
+}
+
+model review {
+  id        String   @id
+  content   String
+  rating    Int
+  createdAt DateTime @db.Date
+  userId    String
+  user      user     @relation(fields: [userId], references: [id])
+  artworkId String
+  artwork   artwork  @relation(fields: [artworkId], references: [id])
+}
+
+model category {
+  id      String       @id
+  name    CategoryName
+  artwork artwork[]
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  CANCELLED
+}
+
+enum ShippingStatus {
+  PENDING
+  SHIPPED
+  DELIVERED
+}
+
+enum CategoryName {
+  PAINTING
+  SCULPTURE
+  PHOTOGRAPHY
+  DIGITAL_ART
+  DRAWING
+  PRINTMAKING
+  OTHER
 }

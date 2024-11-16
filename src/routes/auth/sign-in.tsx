@@ -1,7 +1,11 @@
+import { signIn$ } from "@/server/auth";
 import { signInSchema } from "@/utils/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/start";
 import { useForm } from "react-hook-form";
+import { useSpinDelay } from "spin-delay";
 import {
 	Button,
 	Checkbox,
@@ -9,6 +13,9 @@ import {
 	FormControl,
 	FormField,
 	FormItem,
+	Link,
+	Loader,
+	Note,
 	TextField,
 } from "ui";
 import type { z } from "zod";
@@ -18,6 +25,7 @@ export const Route = createFileRoute("/_auth-layout-id/sign-in")({
 });
 
 function RouteComponent() {
+	const signIn = useServerFn(signIn$);
 	// 1. Define your form.
 	const form = useForm<z.infer<typeof signInSchema>>({
 		resolver: zodResolver(signInSchema),
@@ -27,11 +35,32 @@ function RouteComponent() {
 		},
 	});
 
+	const { mutate, isPending } = useMutation({
+		mutationKey: ["sign-in"],
+		mutationFn: async (data: z.infer<typeof signInSchema>) => {
+			const res = await signIn({
+				data,
+			});
+			if (!res.success) {
+				throw new Error(res.message);
+			}
+
+			return res;
+		},
+		onError: (error) => {
+			form.setError("root", {
+				message: error.message,
+			});
+		},
+	});
+
+	const isLoading = useSpinDelay(isPending, {
+		minDuration: 500,
+	});
+
 	// 2. Define a submit handler.
 	function onSubmit(values: z.infer<typeof signInSchema>) {
-		// Do something with the form values.
-		// ✅ This will be type-safe and validated.
-		console.log(values);
+		mutate(values);
 	}
 
 	return (
@@ -46,6 +75,9 @@ function RouteComponent() {
 			<div>
 				<Form {...form}>
 					<form onSubmit={form.handleSubmit(onSubmit)}>
+						{form.formState.errors.root && (
+							<Note intent="danger">{form.formState.errors.root.message}</Note>
+						)}
 						<div className="space-y-4">
 							<FormField
 								control={form.control}
@@ -91,6 +123,7 @@ function RouteComponent() {
 												isSelected={value}
 												onChange={onChange}
 												{...rest}
+												className="font-medium"
 											>
 												Remember Me
 											</Checkbox>
@@ -99,12 +132,23 @@ function RouteComponent() {
 								)}
 							/>
 						</div>
-						<Button type="submit" size="small" className="w-full mt-6">
-							Sign in
+						<Button
+							type="submit"
+							size="small"
+							className="w-full mt-6"
+							isPending={isPending}
+						>
+							{isLoading ? <Loader variant="spin" /> : "Sign in"}
 						</Button>
 					</form>
 				</Form>
 			</div>
+			<p className="text-sm text-muted-fg mt-6 text-center">
+				Don't have an account?{" "}
+				<Link intent="primary" href="/sign-up" className="font-medium">
+					Sign up
+				</Link>
+			</p>
 		</div>
 	);
 }

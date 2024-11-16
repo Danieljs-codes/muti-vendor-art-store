@@ -214,19 +214,13 @@
 	}
 }
 
-	/* Chrome, Edge, and Safari */
-	*::-webkit-scrollbar {
-		width: 8px;
-		height: 8px;
-	}
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+	transition: background-color 60000000s 0s, color 60000000s 0s;
+}
 
-	*::-webkit-scrollbar-track {
-		background: transparent;
-		border-radius: 5px;
-	}
-
-	*::-webkit-scrollbar-thumb {
-		@apply bg-muted;
-		border-radius: 14px;
-		border: 3px solid transparent;
-	}
+input[data-autocompleted] {
+	background-color: transparent;
+}
