@@ -1,0 +1,232 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+	:root {
+		--light: 223.81 0% 98%;
+		--dark: 239.95 9% 6%;
+		--bg: 0 0% 100%;
+		--fg: 239.93 9% 4%;
+		--primary: 216.77 100% 50%;
+		--primary-fg: 0 0% 100%;
+		--secondary: 240 5.88% 90%;
+		--secondary-fg: 240.01 6% 10%;
+		--tertiary: 0 0% 100%;
+		--tertiary-fg: 240 4% 16%;
+		--overlay: 0 0% 100%;
+		--overlay-fg: 239.93 9% 4%;
+		--muted: 240 5.88% 90%;
+		--muted-fg: 240 4% 41%;
+		--accent: 216.77 100% 50%;
+		--accent-fg: 0 0% 100%;
+		--accent-subtle: 216.92 99% 97%;
+		--accent-subtle-fg: 216.74 100% 40%;
+		--success: 161.17 91% 31%;
+		--success-fg: 151.77 82% 96%;
+		--info: 205.77 100% 50%;
+		--info-fg: 0 0% 100%;
+		--danger: 0.01 72% 51%;
+		--danger-fg: 360 86% 97%;
+		--warning: 43.2 96% 56.99%;
+		--warning-fg: 20.91 91% 14.1%;
+		--border: 240 6% 90%;
+		--input: 240 6% 90%;
+		--ring: var(--primary);
+		--toggle: 240.01 5% 84%;
+		--radius: 0.5rem;
+		--primary-chart: 216.74 100% 45%;
+		--secondary-chart: 219.83 100% 77%;
+		--tertiary-chart: 216.01 92% 60%;
+		--highlight-chart: 210 98% 78%;
+		--accent-chart: 210 98% 78%;
+	}
+
+	.dark {
+		--bg: 0 0% 0%;
+		--fg: 223.81 0% 98%;
+		--primary: 216.04 98% 52%;
+		--primary-fg: 0 0% 100%;
+		--secondary: 239.99 6% 11%;
+		--secondary-fg: 223.81 0% 98%;
+		--tertiary: 240.02 10% 6%;
+		--tertiary-fg: 239.99 4% 96%;
+		--accent: 216.04 98% 52%;
+		--accent-fg: 0 0% 100%;
+		--accent-subtle: 215.99 94% 6%;
+		--accent-subtle-fg: 204.92 100% 77%;
+		--overlay: 240.03 6% 6%;
+		--overlay-fg: 223.81 0% 98%;
+		--muted: 239.95 3% 16%;
+		--muted-fg: 240 5.03% 64.9%;
+		--info: 205.77 100% 50%;
+		--info-fg: 0 0% 100%;
+		--success: 161.17 91% 31%;
+		--success-fg: 151.77 82% 96%;
+		--ring: var(--primary);
+		--toggle: 239.99 5% 26%;
+		--border: 240.01 7.1% 15%;
+		--input: 239.95 3% 16%;
+		--primary-chart: 221.19 83% 53%;
+		--secondary-chart: 211.99 95% 68%;
+		--tertiary-chart: 216.01 92% 60%;
+		--highlight-chart: 210 98% 78%;
+		--accent-chart: 212 96% 87%;
+	}
+}
+
+@layer base {
+	html {
+		@apply scroll-smooth;
+	}
+
+	* {
+		@apply border-border;
+		font-feature-settings: "cv11", "ss01";
+		font-variation-settings: "opsz" 850;
+		text-rendering: optimizeLegibility;
+		scrollbar-width: thin;
+	}
+
+	body {
+		@apply bg-bg text-fg;
+	}
+
+	/* dark mode */
+	.dark {
+		scrollbar-width: thin;
+
+		@media (prefers-color-scheme: dark) {
+			* {
+				scrollbar-width: thin;
+			}
+		}
+	}
+
+	/* Chrome, Edge, and Safari */
+	*::-webkit-scrollbar {
+		width: 8px;
+		height: 8px;
+	}
+
+	*::-webkit-scrollbar-track {
+		background: transparent;
+		border-radius: 5px;
+	}
+
+	*::-webkit-scrollbar-thumb {
+		@apply bg-muted;
+		border-radius: 14px;
+		border: 3px solid transparent;
+	}
+}
+
+:root {
+	font-family: Inter, sans-serif;
+	font-feature-settings: "liga" 1, "calt" 1, "cv11"; /* fix for Chrome */
+}
+@supports (font-variation-settings: normal) {
+	:root {
+		font-family: InterVariable, sans-serif;
+	}
+}
+
+/* Make clicks pass-through */
+#nprogress {
+	pointer-events: none;
+}
+
+#nprogress .bar {
+	background: theme("colors.primary.DEFAULT");
+
+	position: fixed;
+	z-index: 1031;
+	top: 0;
+	left: 0;
+
+	width: 100%;
+	height: 2px;
+}
+
+/* Fancy blur effect */
+#nprogress .peg {
+	display: block;
+	position: absolute;
+	right: 0px;
+	width: 100px;
+	height: 100%;
+	box-shadow: 0 0 10px theme("colors.primary.DEFAULT"), 0 0 5px
+		theme("colors.primary.DEFAULT");
+	opacity: 1;
+
+	-webkit-transform: rotate(3deg) translate(0px, -4px);
+	-ms-transform: rotate(3deg) translate(0px, -4px);
+	transform: rotate(3deg) translate(0px, -4px);
+}
+
+/* Remove these to get rid of the spinner */
+#nprogress .spinner {
+	display: block;
+	position: fixed;
+	z-index: 1031;
+	top: 15px;
+	right: 15px;
+}
+
+#nprogress .spinner-icon {
+	width: 18px;
+	height: 18px;
+	box-sizing: border-box;
+
+	border: solid 2px transparent;
+	border-top-color: theme("colors.primary.DEFAULT");
+	border-left-color: theme("colors.primary.DEFAULT");
+	border-radius: 50%;
+
+	-webkit-animation: nprogress-spinner 400ms linear infinite;
+	animation: nprogress-spinner 400ms linear infinite;
+}
+
+.nprogress-custom-parent {
+	overflow: hidden;
+	position: relative;
+}
+
+.nprogress-custom-parent #nprogress .spinner,
+.nprogress-custom-parent #nprogress .bar {
+	position: absolute;
+}
+
+@-webkit-keyframes nprogress-spinner {
+	0% {
+		-webkit-transform: rotate(0deg);
+	}
+	100% {
+		-webkit-transform: rotate(360deg);
+	}
+}
+@keyframes nprogress-spinner {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+	/* Chrome, Edge, and Safari */
+	*::-webkit-scrollbar {
+		width: 8px;
+		height: 8px;
+	}
+
+	*::-webkit-scrollbar-track {
+		background: transparent;
+		border-radius: 5px;
+	}
+
+	*::-webkit-scrollbar-thumb {
+		@apply bg-muted;
+		border-radius: 14px;
+		border: 3px solid transparent;
+	}
