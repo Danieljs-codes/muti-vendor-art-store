@@ -74,8 +74,8 @@ function RouteComponent() {
 			</div>
 			<div>
 				<Form {...form}>
-					<form onSubmit={form.handleSubmit(onSubmit)}>
-						{form.formState.errors.root && (
+					<form onSubmit={form.handleSubmit(onSubmit)} method="POST">
+						{form.formState.errors.root?.message && (
 							<Note intent="danger">{form.formState.errors.root.message}</Note>
 						)}
 						<div className="space-y-4">

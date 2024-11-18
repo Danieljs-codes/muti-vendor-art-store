@@ -7,9 +7,11 @@ import {
 	Outlet,
 	ScrollRestoration,
 	createRootRouteWithContext,
+	useRouter,
 } from "@tanstack/react-router";
 import { Meta, Scripts } from "@tanstack/start";
 import { type ReactNode, useEffect } from "react";
+import { RouterProvider } from "react-aria-components";
 import { toast as showToast } from "sonner";
 import { Toast } from "ui";
 
@@ -54,6 +56,7 @@ export const Route = createRootRouteWithContext<{
 
 function RootComponent() {
 	const { toast } = Route.useLoaderData();
+	const router = useRouter();
 
 	useEffect(() => {
 		if (!toast) return;
@@ -63,7 +66,12 @@ function RootComponent() {
 	return (
 		<RootDocument>
 			<ThemeProvider>
-				<Outlet />
+				<RouterProvider
+					navigate={(to, options) => router.navigate({ to, ...options })}
+					useHref={(to) => router.buildLocation({ to }).href}
+				>
+					<Outlet />
+				</RouterProvider>
 			</ThemeProvider>
 		</RootDocument>
 	);

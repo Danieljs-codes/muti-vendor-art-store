@@ -22,7 +22,7 @@ export type artist = {
     name: string;
     bio: string;
     portfolioUrl: string | null;
-    paystackSubAccountId: string;
+    paystackSubAccountCode: string;
     createdAt: Timestamp;
     updatedAt: Timestamp;
     userId: string;

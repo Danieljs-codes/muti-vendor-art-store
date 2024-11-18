@@ -1,11 +1,18 @@
-import { setCookieToast } from "@/server/utils";
+import {
+	type ValidRoutes,
+	setCookieAndRedirect,
+	setCookieToast,
+} from "@/server/utils";
 import { auth } from "@/utils/auth";
 import { omit } from "@/utils/misc";
 import { signInSchema, signUpSchema } from "@/utils/schema";
 import { redirect } from "@tanstack/react-router";
-import { createServerFn } from "@tanstack/start";
+import { createMiddleware, createServerFn } from "@tanstack/start";
 import { APIError } from "better-auth/api";
 import { getWebRequest, setResponseHeader } from "vinxi/http";
+import { z } from "zod";
+import { validateUserMiddleware } from "./middlewares/auth"
+import { maybeArtistMiddleware } from "./middlewares/artist"
 import { db } from "./database";
 
 export const signIn$ = createServerFn({
@@ -29,7 +36,7 @@ export const signIn$ = createServerFn({
 			if (error instanceof APIError) {
 				return {
 					success: false as const,
-					message: error.body.message || error.message,
+					message: (error.body.message as string) || (error.message as string),
 				};
 			}
 
@@ -142,3 +149,87 @@ export const getUserArtist$ = createServerFn({
 		user: omit(userSession.user, ["createdAt", "updatedAt"]),
 	};
 });
+
+const getArtistSchema = z.object({
+	userId: z.string(),
+});
+
+export const getArtist$ = createServerFn({
+	method: "GET",
+})
+	.validator(getArtistSchema)
+	.handler(async ({ data }) => {
+		const artist = await db
+			.selectFrom("artist")
+			.where("artist.userId", "=", data.userId)
+			.selectAll()
+			.executeTakeFirst();
+
+		return artist ? omit(artist, ["createdAt", "updatedAt"]) : null;
+	});
+
+const validateCreateArtistAccessSchema = z.object({
+	redirectTo: z
+		.string()
+		.optional()
+		.default("/sign-in") as z.ZodType<ValidRoutes>,
+});
+
+export const validateCreateArtistAccess$ = createServerFn({
+	method: "GET",
+})
+	.validator(validateCreateArtistAccessSchema)
+	.handler(async ({ data }) => {
+		const user = await getUser$();
+
+		if (!user) {
+			throw await setCookieAndRedirect({
+				data: {
+					intent: "error",
+					message: "You must be signed in to create an artist profile",
+					redirectTo: data.redirectTo,
+				},
+			});
+		}
+
+		const artist = await getArtist$({
+			data: {
+				userId: user.user.id,
+			},
+		});
+
+		if (artist) {
+			throw await setCookieAndRedirect({
+				data: {
+					intent: "error",
+					message: "You already have an artist profile",
+					redirectTo: "/",
+				},
+			});
+		}
+
+		return { user };
+	});
+
+export const validateArtistDashboardAccess$ = createServerFn({
+	method: "GET",
+})
+	.middleware([maybeArtistMiddleware])
+	.handler(async ({ context }) => {
+		const { artist, user } = context;
+
+		if (!artist) {
+			throw await setCookieAndRedirect({
+				data: {
+					intent: "error",
+					message: "Artist profile not found",
+					redirectTo: "/",
+				},
+			});
+		}
+
+		return {
+			artist: omit(artist, ["createdAt", "updatedAt"]),
+			user,
+		};
+	});

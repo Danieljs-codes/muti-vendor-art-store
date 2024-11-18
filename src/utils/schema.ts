@@ -32,3 +32,23 @@ export const signUpSchema = z
 		message: "Passwords don't match",
 		path: ["confirmPassword"],
 	});
+
+export const createArtistProfileSchema = z.object({
+	name: z.string().min(3, { message: "Name must be at least 3 characters" }),
+	portfolioUrl: z.string().refine(
+		(val) => {
+			if (!val) return true;
+			if (val?.startsWith("http")) return true;
+			return false;
+		},
+		{
+			message: "Invalid URL",
+		},
+	),
+	bio: z.string().min(10, { message: "Bio must be at least 10 characters" }),
+	accountNumber: z
+		.string()
+		.length(10, { message: "Account number must be 10 digits" }),
+	// The bank code should be from paystack
+	bankCode: z.string().min(1, { message: "Bank code is required" }),
+});

@@ -3,7 +3,6 @@ import {
 	type NavigateOptions,
 	type ToOptions,
 	createRouter as createTanStackRouter,
-	useRouter,
 } from "@tanstack/react-router";
 import { routerWithQueryClient } from "@tanstack/react-router-with-query";
 import { RouterProvider } from "react-aria-components";
@@ -23,17 +22,6 @@ export function createRouter() {
 			routeTree,
 			context: { queryClient },
 			defaultPreload: "intent",
-			InnerWrap: ({ children }) => {
-				const router = useRouter();
-				return (
-					<RouterProvider
-						navigate={(to, options) => router.navigate({ to, ...options })}
-						useHref={(to) => router.buildLocation({ to }).href}
-					>
-						{children}
-					</RouterProvider>
-				);
-			},
 		}),
 		queryClient,
 	);

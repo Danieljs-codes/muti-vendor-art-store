@@ -100,14 +100,14 @@ export const AppNavbar = ({
 							>
 								<Menu.Section>
 									<Menu.Header separator>
-										<span className="block">Irsyad A. Panjaitan</span>
+										<span className="block">{user.name}</span>
 										<span className="font-normal text-muted-fg">
-											@irsyadadl
+											{user.email}
 										</span>
 									</Menu.Header>
 								</Menu.Section>
 
-								<Menu.Item href="/">
+								<Menu.Item href="/dashboard/overview">
 									<IconDashboard />
 									Dashboard
 								</Menu.Item>
@@ -143,6 +143,18 @@ export const AppNavbar = ({
 							to="/create-artist"
 						>
 							Become an artist
+						</Link>
+					) : null}
+					{!user ? (
+						<Link
+							className={buttonStyles({
+								size: "extra-small",
+								intent: "secondary",
+								shape: "circle",
+							})}
+							to="/sign-in"
+						>
+							Sign in
 						</Link>
 					) : null}
 				</Navbar.Section>
@@ -193,14 +205,14 @@ export const AppNavbar = ({
 							>
 								<Menu.Section>
 									<Menu.Header separator>
-										<span className="block">Irsyad A. Panjaitan</span>
+										<span className="block">{user.name}</span>
 										<span className="font-normal text-muted-fg">
-											@irsyadadl
+											{user.email}
 										</span>
 									</Menu.Header>
 								</Menu.Section>
 
-								<Menu.Item href="/">
+								<Menu.Item href="/dashboard/overview">
 									<IconDashboard />
 									Dashboard
 								</Menu.Item>

@@ -13,10 +13,12 @@
 import { Route as rootRoute } from './routes/root'
 import { Route as artistCreateImport } from './routes/artist/create'
 import { Route as layoutImport } from './routes/layout'
+import { Route as artistLayoutImport } from './routes/artist/layout'
 import { Route as authLayoutImport } from './routes/auth/layout'
 import { Route as authSignUpImport } from './routes/auth/sign-up'
 import { Route as authSignInImport } from './routes/auth/sign-in'
 import { Route as indexImport } from './routes/index'
+import { Route as artistOverviewImport } from './routes/artist/overview'
 
 // Create/Update Routes
 
@@ -28,6 +30,11 @@ const artistCreateRoute = artistCreateImport.update({
 
 const layoutRoute = layoutImport.update({
   id: '/_main-layout-id',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const artistLayoutRoute = artistLayoutImport.update({
+  id: '/_dashboard-layout-id',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -54,6 +61,12 @@ const indexRoute = indexImport.update({
   getParentRoute: () => layoutRoute,
 } as any)
 
+const artistOverviewRoute = artistOverviewImport.update({
+  id: '/dashboard/overview',
+  path: '/dashboard/overview',
+  getParentRoute: () => artistLayoutRoute,
+} as any)
+
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
@@ -63,6 +76,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: ''
       preLoaderRoute: typeof authLayoutImport
+      parentRoute: typeof rootRoute
+    }
+    '/_dashboard-layout-id': {
+      id: '/_dashboard-layout-id'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof artistLayoutImport
       parentRoute: typeof rootRoute
     }
     '/_main-layout-id': {
@@ -100,6 +120,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authSignUpImport
       parentRoute: typeof authLayoutImport
     }
+    '/_dashboard-layout-id/dashboard/overview': {
+      id: '/_dashboard-layout-id/dashboard/overview'
+      path: '/dashboard/overview'
+      fullPath: '/dashboard/overview'
+      preLoaderRoute: typeof artistOverviewImport
+      parentRoute: typeof artistLayoutImport
+    }
   }
 }
 
@@ -119,6 +146,18 @@ const authLayoutRouteWithChildren = authLayoutRoute._addFileChildren(
   authLayoutRouteChildren,
 )
 
+interface artistLayoutRouteChildren {
+  artistOverviewRoute: typeof artistOverviewRoute
+}
+
+const artistLayoutRouteChildren: artistLayoutRouteChildren = {
+  artistOverviewRoute: artistOverviewRoute,
+}
+
+const artistLayoutRouteWithChildren = artistLayoutRoute._addFileChildren(
+  artistLayoutRouteChildren,
+)
+
 interface layoutRouteChildren {
   indexRoute: typeof indexRoute
 }
@@ -136,50 +175,70 @@ export interface FileRoutesByFullPath {
   '/': typeof indexRoute
   '/sign-in': typeof authSignInRoute
   '/sign-up': typeof authSignUpRoute
+  '/dashboard/overview': typeof artistOverviewRoute
 }
 
 export interface FileRoutesByTo {
-  '': typeof authLayoutRouteWithChildren
+  '': typeof artistLayoutRouteWithChildren
   '/create-artist': typeof artistCreateRoute
   '/': typeof indexRoute
   '/sign-in': typeof authSignInRoute
   '/sign-up': typeof authSignUpRoute
+  '/dashboard/overview': typeof artistOverviewRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/_auth-layout-id': typeof authLayoutRouteWithChildren
+  '/_dashboard-layout-id': typeof artistLayoutRouteWithChildren
   '/_main-layout-id': typeof layoutRouteWithChildren
   '/create-artist': typeof artistCreateRoute
   '/_main-layout-id/': typeof indexRoute
   '/_auth-layout-id/sign-in': typeof authSignInRoute
   '/_auth-layout-id/sign-up': typeof authSignUpRoute
+  '/_dashboard-layout-id/dashboard/overview': typeof artistOverviewRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '' | '/create-artist' | '/' | '/sign-in' | '/sign-up'
+  fullPaths:
+    | ''
+    | '/create-artist'
+    | '/'
+    | '/sign-in'
+    | '/sign-up'
+    | '/dashboard/overview'
   fileRoutesByTo: FileRoutesByTo
-  to: '' | '/create-artist' | '/' | '/sign-in' | '/sign-up'
+  to:
+    | ''
+    | '/create-artist'
+    | '/'
+    | '/sign-in'
+    | '/sign-up'
+    | '/dashboard/overview'
   id:
     | '__root__'
     | '/_auth-layout-id'
+    | '/_dashboard-layout-id'
     | '/_main-layout-id'
     | '/create-artist'
     | '/_main-layout-id/'
     | '/_auth-layout-id/sign-in'
     | '/_auth-layout-id/sign-up'
+    | '/_dashboard-layout-id/dashboard/overview'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   authLayoutRoute: typeof authLayoutRouteWithChildren
+  artistLayoutRoute: typeof artistLayoutRouteWithChildren
   layoutRoute: typeof layoutRouteWithChildren
   artistCreateRoute: typeof artistCreateRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   authLayoutRoute: authLayoutRouteWithChildren,
+  artistLayoutRoute: artistLayoutRouteWithChildren,
   layoutRoute: layoutRouteWithChildren,
   artistCreateRoute: artistCreateRoute,
 }
@@ -195,6 +254,7 @@ export const routeTree = rootRoute
       "filePath": "root.tsx",
       "children": [
         "/_auth-layout-id",
+        "/_dashboard-layout-id",
         "/_main-layout-id",
         "/create-artist"
       ]
@@ -204,6 +264,12 @@ export const routeTree = rootRoute
       "children": [
         "/_auth-layout-id/sign-in",
         "/_auth-layout-id/sign-up"
+      ]
+    },
+    "/_dashboard-layout-id": {
+      "filePath": "artist/layout.tsx",
+      "children": [
+        "/_dashboard-layout-id/dashboard/overview"
       ]
     },
     "/_main-layout-id": {
@@ -226,6 +292,10 @@ export const routeTree = rootRoute
     "/_auth-layout-id/sign-up": {
       "filePath": "auth/sign-up.tsx",
       "parent": "/_auth-layout-id"
+    },
+    "/_dashboard-layout-id/dashboard/overview": {
+      "filePath": "artist/overview.tsx",
+      "parent": "/_dashboard-layout-id"
     }
   }
 }
