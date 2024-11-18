@@ -18,22 +18,22 @@ import { Toast } from "ui";
 export const Route = createRootRouteWithContext<{
 	queryClient: QueryClient;
 }>()({
-	meta: () => [
-		{
-			charSet: "utf-8",
-		},
-		{
-			name: "viewport",
-			content: "width=device-width, initial-scale=1",
-		},
-		{
-			title: "TanStack Start Starter",
-		},
-	],
-	links: () => [{ rel: "stylesheet", href: globalStyle }],
-	// https://github.com/TanStack/router/issues/1992#issuecomment-2397896356
-	scripts: () =>
-		import.meta.env.PROD
+	head: () => ({
+		meta: [
+			{
+				charSet: "utf-8",
+			},
+			{
+				name: "viewport",
+				content: "width=device-width, initial-scale=1",
+			},
+			{
+				title: "TanStack Start Starter",
+			},
+		],
+		links: [{ rel: "stylesheet", href: globalStyle }],
+		// https://github.com/TanStack/router/issues/1992#issuecomment-2397896356
+		scripts: import.meta.env.PROD
 			? []
 			: [
 					{
@@ -46,6 +46,7 @@ export const Route = createRootRouteWithContext<{
 	  				`,
 					},
 				],
+	}),
 	loader: async () => {
 		return {
 			toast: await getToast(),

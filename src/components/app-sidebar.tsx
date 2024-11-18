@@ -23,12 +23,12 @@ type User = Omit<
 	"createdAt" | "updatedAt"
 >;
 export function AppSidebar({
-	props,
-}: {
-	props: React.ComponentProps<typeof Sidebar> & {
-		user: User;
-		pendingOrders: number;
-	};
+	user,
+	pendingOrders,
+	...props
+}: React.ComponentProps<typeof Sidebar> & {
+	user: User;
+	pendingOrders: number;
 }) {
 	const { theme, setTheme } = useTheme();
 
@@ -62,7 +62,7 @@ export function AppSidebar({
 					<Sidebar.Item
 						icon={Icons.Orders}
 						href="/"
-						badge={String(props.pendingOrders)}
+						badge={String(pendingOrders)}
 					>
 						Orders
 					</Sidebar.Item>
@@ -93,11 +93,11 @@ export function AppSidebar({
 						<Avatar
 							size="small"
 							shape="square"
-							src={props.user.image}
-							initials={props.user.name[0]}
+							src={user.image}
+							initials={user.name[0]}
 						/>
 						<span className="group-data-[collapsible=dock]:hidden flex items-center justify-center">
-							{props.user.name}
+							{user.name}
 							<IconChevronLgDown className="right-3 size-4 absolute group-pressed:rotate-180 transition-transform" />
 						</span>
 					</Button>

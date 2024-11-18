@@ -4,7 +4,6 @@ import { validateArtistDashboardAccess$ } from "@server/auth";
 import { getArtistPendingOrdersQueryOptions } from "@server/query-options";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Outlet, createFileRoute } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/start";
 import {
 	IconChevronLgDown,
 	IconCirclePerson,
@@ -31,7 +30,6 @@ export const Route = createFileRoute("/_dashboard-layout-id")({
 });
 
 function RouteComponent() {
-	const getArtistPendingOrders = useServerFn(getArtistPendingOrders$);
 	const { artist, user } = Route.useRouteContext();
 	const { theme, setTheme } = useTheme();
 
@@ -46,9 +44,7 @@ function RouteComponent() {
 
 	return (
 		<Sidebar.Provider>
-			<AppSidebar
-				props={{ user: user, pendingOrders: pendingOrders.data.length }}
-			/>
+			<AppSidebar user={user} pendingOrders={pendingOrders.data.length} />
 			<Sidebar.Inset>
 				<Sidebar.Nav isSticky>
 					<span className="flex items-center gap-x-3">
