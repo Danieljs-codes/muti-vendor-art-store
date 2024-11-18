@@ -1,11 +1,10 @@
 import { PAYSTACK_PERCENTAGE_CHARGE } from "@/utils/const";
 import { createArtistProfileSchema } from "@/utils/schema";
 import { paystack } from "@server/paystack";
-import { createMiddleware, createServerFn } from "@tanstack/start";
-import { validateUserMiddleware } from "./middlewares/auth";
+import { createServerFn } from "@tanstack/start";
 import { db } from "./database";
-import { setCookieAndRedirect } from "./utils";
 import { maybeArtistMiddleware } from "./middlewares/artist";
+import { setCookieAndRedirect } from "./utils";
 
 const validateBankSchema = createArtistProfileSchema.pick({
 	bankCode: true,
@@ -90,4 +89,45 @@ export const createArtist$ = createServerFn()
 				redirectTo: "/",
 			},
 		});
+	});
+
+export const getArtistPendingOrders$ = createServerFn()
+	.middleware([maybeArtistMiddleware])
+	.handler(async ({ context }) => {
+		const { artist } = context;
+
+		if (!artist) {
+			throw await setCookieAndRedirect({
+				data: {
+					intent: "error",
+					message: "Artist profile not found",
+					redirectTo: "/",
+				},
+			});
+		}
+
+		const pendingOrders = await db
+			.selectFrom("order")
+			.innerJoin("orderItem", "orderItem.orderId", "order.id")
+			.innerJoin("artwork", "artwork.id", "orderItem.artworkId")
+			.where("artwork.artistId", "=", artist.id)
+			.where("order.status", "=", "PENDING")
+			.select([
+				"order.id",
+				"order.totalPrice",
+				"order.status",
+				"order.shippingStatus",
+				"orderItem.quantity",
+				"orderItem.price",
+				"orderItem.finalPrice",
+				"orderItem.platformFee",
+				"artwork.title",
+				"artwork.imageUrls",
+			])
+			.execute();
+
+		return {
+			success: true as const,
+			data: pendingOrders,
+		};
 	});

@@ -106,7 +106,6 @@ export const AppNavbar = ({
 										</span>
 									</Menu.Header>
 								</Menu.Section>
-
 								<Menu.Item href="/dashboard/overview">
 									<IconDashboard />
 									Dashboard

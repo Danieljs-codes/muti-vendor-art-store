@@ -21,3 +21,21 @@ export const omit = <
 
 	return clonedObject;
 };
+
+export const koboToNaira = (amount: number) => {
+	return amount / 100;
+};
+
+export const formatCurrency = ({
+	amount,
+	isKobo = true,
+}: {
+	amount: number;
+	isKobo?: boolean;
+}) => {
+	const amountInNaira = isKobo ? koboToNaira(amount) : amount;
+	return new Intl.NumberFormat("en-NG", {
+		style: "currency",
+		currency: "NGN",
+	}).format(amountInNaira);
+};

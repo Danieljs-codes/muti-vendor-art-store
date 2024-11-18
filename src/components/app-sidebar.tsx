@@ -25,7 +25,10 @@ type User = Omit<
 export function AppSidebar({
 	props,
 }: {
-	props: React.ComponentProps<typeof Sidebar> & { user: User };
+	props: React.ComponentProps<typeof Sidebar> & {
+		user: User;
+		pendingOrders: number;
+	};
 }) {
 	const { theme, setTheme } = useTheme();
 
@@ -56,7 +59,11 @@ export function AppSidebar({
 					<Sidebar.Item icon={Icons.Artwork} href="/">
 						Artworks
 					</Sidebar.Item>
-					<Sidebar.Item icon={Icons.Orders} href="/">
+					<Sidebar.Item
+						icon={Icons.Orders}
+						href="/"
+						badge={String(props.pendingOrders)}
+					>
 						Orders
 					</Sidebar.Item>
 					<Sidebar.Item icon={Icons.Discount} href="/">
@@ -86,7 +93,8 @@ export function AppSidebar({
 						<Avatar
 							size="small"
 							shape="square"
-							src="/images/sidebar/profile-slash.jpg"
+							src={props.user.image}
+							initials={props.user.name[0]}
 						/>
 						<span className="group-data-[collapsible=dock]:hidden flex items-center justify-center">
 							{props.user.name}

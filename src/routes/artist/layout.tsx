@@ -1,6 +1,10 @@
 import { AppSidebar } from "@/components/app-sidebar";
+import { getArtistPendingOrders$ } from "@server/artist";
 import { validateArtistDashboardAccess$ } from "@server/auth";
+import { getArtistPendingOrdersQueryOptions } from "@server/query-options";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { Outlet, createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/start";
 import {
 	IconChevronLgDown,
 	IconCirclePerson,
@@ -20,12 +24,21 @@ export const Route = createFileRoute("/_dashboard-layout-id")({
 
 		return { artist, user };
 	},
+	loader: async ({ context: { queryClient } }) => {
+		queryClient.ensureQueryData(getArtistPendingOrdersQueryOptions());
+	},
 	component: RouteComponent,
 });
 
 function RouteComponent() {
+	const getArtistPendingOrders = useServerFn(getArtistPendingOrders$);
 	const { artist, user } = Route.useRouteContext();
 	const { theme, setTheme } = useTheme();
+
+	const { data: pendingOrders } = useSuspenseQuery({
+		...getArtistPendingOrdersQueryOptions(),
+		queryFn: () => getArtistPendingOrders$(),
+	});
 
 	const toggleTheme = () => {
 		setTheme(theme === "dark" ? "light" : "dark");
@@ -33,7 +46,9 @@ function RouteComponent() {
 
 	return (
 		<Sidebar.Provider>
-			<AppSidebar props={{ user: user }} />
+			<AppSidebar
+				props={{ user: user, pendingOrders: pendingOrders.data.length }}
+			/>
 			<Sidebar.Inset>
 				<Sidebar.Nav isSticky>
 					<span className="flex items-center gap-x-3">
@@ -57,7 +72,8 @@ function RouteComponent() {
 								<Avatar
 									size="small"
 									shape="circle"
-									src="/images/sidebar/profile-slash.jpg"
+									src={user.image}
+									initials={user.name[0]}
 								/>
 								<IconChevronLgDown className="size-4 group-pressed:rotate-180 transition-transform" />
 							</Menu.Trigger>

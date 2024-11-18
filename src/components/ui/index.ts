@@ -30,3 +30,4 @@ export * from './textarea';
 export * from './sidebar';
 export * from './tooltip';
 export * from './search-field';
+export * from './badge';
