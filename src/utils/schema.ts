@@ -52,3 +52,37 @@ export const createArtistProfileSchema = z.object({
 	// The bank code should be from paystack
 	bankCode: z.string().min(1, { message: "Bank code is required" }),
 });
+
+export const createArtworkSchema = z.object({
+	title: z.string().min(3, { message: "Title must be at least 3 characters" }),
+	description: z
+		.string()
+		.min(10, { message: "Description must be at least 10 characters" }),
+	price: z.number().positive({ message: "Price must be greater than 0" }),
+	imageUrls: z
+		.array(z.string().url({ message: "Invalid image URL" }))
+		.min(1, { message: "At least one image is required" }),
+	dimensions: z
+		.string()
+		.regex(/^\d+(\.\d+)?\s*x\s*\d+(\.\d+)?\s*x\s*\d+(\.\d+)?$/, {
+			message: "Dimensions must be in format: length x width x height",
+		}),
+	weight: z
+		.number()
+		.positive({ message: "Weight must be greater than 0" })
+		.optional(),
+	condition: z.enum(["NEW", "LIKE_NEW", "GOOD", "FAIR"]),
+	stock: z.number().int().positive({ message: "Stock must be greater than 0" }),
+	category: z.enum([
+		"PAINTING",
+		"SCULPTURE",
+		"PHOTOGRAPHY",
+		"DIGITAL",
+		"MIXED_MEDIA",
+		"DRAWING",
+		"PRINTMAKING",
+		"TEXTILE",
+		"CERAMIC",
+		"OTHER",
+	]),
+});

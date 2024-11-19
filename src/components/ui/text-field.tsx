@@ -19,10 +19,11 @@ import {forwardRef} from "react";
 type InputType = Exclude<TextInputDOMProps["type"], "password">
 
 interface BaseTextFieldProps extends TextFieldPrimitiveProps, FieldProps {
-  prefix?: React.ReactNode
-  suffix?: React.ReactNode
-  isPending?: boolean
-  className?: string
+	prefix?: React.ReactNode;
+	suffix?: React.ReactNode;
+	isPending?: boolean;
+	className?: string;
+	descriptionClassName?: string;
 }
 
 interface RevealableTextFieldProps extends BaseTextFieldProps {
@@ -37,63 +38,77 @@ interface NonRevealableTextFieldProps extends BaseTextFieldProps {
 
 type TextFieldProps = RevealableTextFieldProps | NonRevealableTextFieldProps
 
-const TextField = forwardRef<HTMLInputElement, TextFieldProps>(({
-  placeholder,
-  label,
-  description,
-  errorMessage,
-  prefix,
-  suffix,
-  isPending,
-  className,
-  isRevealable,
-  type,
-  ...props
-}, ref) => {
-  const [isPasswordVisible, setIsPasswordVisible] = React.useState(false)
-  const inputType = isRevealable ? (isPasswordVisible ? "text" : "password") : type
+const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
+	(
+		{
+			placeholder,
+			label,
+			description,
+			errorMessage,
+			prefix,
+			suffix,
+			isPending,
+			className,
+			isRevealable,
+			descriptionClassName,
+			type,
+			...props
+		},
+		ref,
+	) => {
+		const [isPasswordVisible, setIsPasswordVisible] = React.useState(false);
+		const inputType = isRevealable
+			? isPasswordVisible
+				? "text"
+				: "password"
+			: type;
 
-  const handleTogglePasswordVisibility = () => {
-    setIsPasswordVisible((prev) => !prev)
-  }
-  return (
-    <TextFieldPrimitive
-      type={inputType}
-      {...props}
-      className={ctr(className, "group flex flex-col gap-y-1.5")}
-    >
-      {label && <Label>{label}</Label>}
-      <FieldGroup
-        data-loading={isPending ? "true" : undefined}
-        className={fieldGroupPrefixStyles({ className })}
-      >
-        {prefix ? (
-          <span data-slot="prefix" className="atrs x2e2">
-            {prefix}
-          </span>
-        ) : null}
-        <Input ref={ref} placeholder={placeholder} />
-        {isRevealable ? (
-          <ButtonPrimitive
-            type="button"
-            aria-label="Toggle password visibility"
-            onPress={handleTogglePasswordVisibility}
-            className="atrs relative [&>[data-slot=icon]]:text-muted-fg focus:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded"
-          >
-            <>{isPasswordVisible ? <IconEyeClosed /> : <IconEye />}</>
-          </ButtonPrimitive>
-        ) : isPending ? (
-          <Loader variant="spin" data-slot="suffix" />
-        ) : suffix ? (
-          <span data-slot="suffix" className="atrs x2e2">
-            {suffix}
-          </span>
-        ) : null}
-      </FieldGroup>
-      {description && <Description>{description}</Description>}
-      <FieldError>{errorMessage}</FieldError>
-    </TextFieldPrimitive>
-  )
-})
+		const handleTogglePasswordVisibility = () => {
+			setIsPasswordVisible((prev) => !prev);
+		};
+		return (
+			<TextFieldPrimitive
+				type={inputType}
+				{...props}
+				className={ctr(className, "group flex flex-col gap-y-1.5")}
+			>
+				{label && <Label>{label}</Label>}
+				<FieldGroup
+					data-loading={isPending ? "true" : undefined}
+					className={fieldGroupPrefixStyles({ className })}
+				>
+					{prefix ? (
+						<span data-slot="prefix" className="atrs x2e2">
+							{prefix}
+						</span>
+					) : null}
+					<Input ref={ref} placeholder={placeholder} />
+					{isRevealable ? (
+						<ButtonPrimitive
+							type="button"
+							aria-label="Toggle password visibility"
+							onPress={handleTogglePasswordVisibility}
+							className="atrs relative [&>[data-slot=icon]]:text-muted-fg focus:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded"
+						>
+							<>{isPasswordVisible ? <IconEyeClosed /> : <IconEye />}</>
+						</ButtonPrimitive>
+					) : isPending ? (
+						<Loader variant="spin" data-slot="suffix" />
+					) : suffix ? (
+						<span data-slot="suffix" className="atrs x2e2">
+							{suffix}
+						</span>
+					) : null}
+				</FieldGroup>
+				{description && (
+					<Description className={descriptionClassName}>
+						{description}
+					</Description>
+				)}
+				<FieldError>{errorMessage}</FieldError>
+			</TextFieldPrimitive>
+		);
+	},
+)
 
 export { TextField, TextFieldPrimitive, type TextFieldProps }

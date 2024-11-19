@@ -19,6 +19,7 @@ import { Route as authSignUpImport } from './routes/auth/sign-up'
 import { Route as authSignInImport } from './routes/auth/sign-in'
 import { Route as indexImport } from './routes/index'
 import { Route as artistOverviewImport } from './routes/artist/overview'
+import { Route as artistArtworkNewImport } from './routes/artist/artwork-new'
 import { Route as artistArtworkImport } from './routes/artist/artwork'
 
 // Create/Update Routes
@@ -65,6 +66,12 @@ const indexRoute = indexImport.update({
 const artistOverviewRoute = artistOverviewImport.update({
   id: '/dashboard/overview',
   path: '/dashboard/overview',
+  getParentRoute: () => artistLayoutRoute,
+} as any)
+
+const artistArtworkNewRoute = artistArtworkNewImport.update({
+  id: '/dashboard/artworks-new',
+  path: '/dashboard/artworks-new',
   getParentRoute: () => artistLayoutRoute,
 } as any)
 
@@ -134,6 +141,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof artistArtworkImport
       parentRoute: typeof artistLayoutImport
     }
+    '/_dashboard-layout-id/dashboard/artworks-new': {
+      id: '/_dashboard-layout-id/dashboard/artworks-new'
+      path: '/dashboard/artworks-new'
+      fullPath: '/dashboard/artworks-new'
+      preLoaderRoute: typeof artistArtworkNewImport
+      parentRoute: typeof artistLayoutImport
+    }
     '/_dashboard-layout-id/dashboard/overview': {
       id: '/_dashboard-layout-id/dashboard/overview'
       path: '/dashboard/overview'
@@ -162,11 +176,13 @@ const authLayoutRouteWithChildren = authLayoutRoute._addFileChildren(
 
 interface artistLayoutRouteChildren {
   artistArtworkRoute: typeof artistArtworkRoute
+  artistArtworkNewRoute: typeof artistArtworkNewRoute
   artistOverviewRoute: typeof artistOverviewRoute
 }
 
 const artistLayoutRouteChildren: artistLayoutRouteChildren = {
   artistArtworkRoute: artistArtworkRoute,
+  artistArtworkNewRoute: artistArtworkNewRoute,
   artistOverviewRoute: artistOverviewRoute,
 }
 
@@ -192,6 +208,7 @@ export interface FileRoutesByFullPath {
   '/sign-in': typeof authSignInRoute
   '/sign-up': typeof authSignUpRoute
   '/dashboard/artworks': typeof artistArtworkRoute
+  '/dashboard/artworks-new': typeof artistArtworkNewRoute
   '/dashboard/overview': typeof artistOverviewRoute
 }
 
@@ -202,6 +219,7 @@ export interface FileRoutesByTo {
   '/sign-in': typeof authSignInRoute
   '/sign-up': typeof authSignUpRoute
   '/dashboard/artworks': typeof artistArtworkRoute
+  '/dashboard/artworks-new': typeof artistArtworkNewRoute
   '/dashboard/overview': typeof artistOverviewRoute
 }
 
@@ -215,6 +233,7 @@ export interface FileRoutesById {
   '/_auth-layout-id/sign-in': typeof authSignInRoute
   '/_auth-layout-id/sign-up': typeof authSignUpRoute
   '/_dashboard-layout-id/dashboard/artworks': typeof artistArtworkRoute
+  '/_dashboard-layout-id/dashboard/artworks-new': typeof artistArtworkNewRoute
   '/_dashboard-layout-id/dashboard/overview': typeof artistOverviewRoute
 }
 
@@ -227,6 +246,7 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/dashboard/artworks'
+    | '/dashboard/artworks-new'
     | '/dashboard/overview'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -236,6 +256,7 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/dashboard/artworks'
+    | '/dashboard/artworks-new'
     | '/dashboard/overview'
   id:
     | '__root__'
@@ -247,6 +268,7 @@ export interface FileRouteTypes {
     | '/_auth-layout-id/sign-in'
     | '/_auth-layout-id/sign-up'
     | '/_dashboard-layout-id/dashboard/artworks'
+    | '/_dashboard-layout-id/dashboard/artworks-new'
     | '/_dashboard-layout-id/dashboard/overview'
   fileRoutesById: FileRoutesById
 }
@@ -292,6 +314,7 @@ export const routeTree = rootRoute
       "filePath": "artist/layout.tsx",
       "children": [
         "/_dashboard-layout-id/dashboard/artworks",
+        "/_dashboard-layout-id/dashboard/artworks-new",
         "/_dashboard-layout-id/dashboard/overview"
       ]
     },
@@ -318,6 +341,10 @@ export const routeTree = rootRoute
     },
     "/_dashboard-layout-id/dashboard/artworks": {
       "filePath": "artist/artwork.tsx",
+      "parent": "/_dashboard-layout-id"
+    },
+    "/_dashboard-layout-id/dashboard/artworks-new": {
+      "filePath": "artist/artwork-new.tsx",
       "parent": "/_dashboard-layout-id"
     },
     "/_dashboard-layout-id/dashboard/overview": {

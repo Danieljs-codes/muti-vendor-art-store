@@ -274,9 +274,7 @@ export const getArtistArtworks$ = createServerFn()
 		return {
 			success: true as const,
 			data: {
-				artworks: artworks.map((artwork) =>
-					omit(artwork, ["createdAt", "updatedAt"]),
-				),
+				artworks: artworks.map((artwork) => omit(artwork, ["updatedAt"])),
 				pagination: {
 					currentPage: page,
 					totalPages: Math.ceil(totalCount / limit),

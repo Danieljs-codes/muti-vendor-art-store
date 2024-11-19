@@ -68,6 +68,7 @@ model artist {
   userId                 String
   user                   user      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   artwork                artwork[]
+  scheduledUpload        scheduledUpload[]
 }
 
 model artwork {
@@ -89,6 +90,26 @@ model artwork {
   wishlist    wishlist[]
   discount    discount[]
   review      review[]
+  category    CategoryName
+  categoryId  String
+}
+
+model scheduledUpload {
+  id          String       @id
+  title       String
+  description String
+  price       Float
+  imageUrls   String[]
+  dimensions  String
+  weight      Float?
+  condition   ArtCondition
+  stock       Int
+  scheduledAt DateTime     @db.Date
+  status      UploadStatus @default(PENDING)
+  createdAt   DateTime     @db.Date
+  updatedAt   DateTime     @db.Date
+  artistId    String
+  artist      artist       @relation(fields: [artistId], references: [id], onDelete: Cascade)
   category    CategoryName
   categoryId  String
 }
@@ -193,4 +214,10 @@ enum ArtCondition {
   GOOD
   FAIR
   POOR
+}
+
+enum UploadStatus {
+  PENDING
+  COMPLETED
+  FAILED
 }

@@ -45,7 +45,55 @@ export const Route = createFileRoute(
 	component: RouteComponent,
 });
 
-
+const testData = {
+	artworks: [
+		{
+			id: "ART001",
+			title: "Sunset Dreams",
+			price: "$1,200.00",
+			category: "Painting",
+			dimensions: '24" x 36"',
+			weight: "2.5 kg",
+			stock: 1,
+			condition: "New",
+			createdAt: new Date(),
+		},
+		{
+			id: "ART002",
+			title: "Abstract Harmony",
+			price: "$850.00",
+			category: "Mixed Media",
+			dimensions: '18" x 24"',
+			weight: "1.8 kg",
+			stock: 2,
+			condition: "Excellent",
+			createdAt: new Date(),
+		},
+		{
+			id: "ART003",
+			title: "Bronze Sculpture - Dancing Figure",
+			price: "$3,500.00",
+			category: "Sculpture",
+			dimensions: '12" x 8" x 20"',
+			weight: "5.2 kg",
+			stock: 1,
+			condition: "New",
+			createdAt: new Date(),
+		},
+		{
+			id: "ART004",
+			title: "Urban Landscape",
+			price: "$950.00",
+			category: "Photography",
+			dimensions: '30" x 40"',
+			weight: "1.2 kg",
+			stock: 3,
+			condition: "New",
+			createdAt: new Date(),
+		},
+	],
+	total: 4,
+};
 
 const getBadgeConditionIntent = (condition: string) => {
 	switch (condition.toLowerCase()) {
@@ -105,7 +153,10 @@ function RouteComponent() {
 						Manage and track all your artworks in one place
 					</Description>
 				</div>
-				<Link className={buttonStyles({ shape: "circle", size: "small" })}>
+				<Link
+					className={buttonStyles({ shape: "circle", size: "small" })}
+					to="/dashboard/artworks-new"
+				>
 					<Icons.ArtworkUpload />
 					Upload Artwork
 				</Link>
@@ -133,10 +184,11 @@ function RouteComponent() {
 								<Table.Column>Weight</Table.Column>
 								<Table.Column>Stock</Table.Column>
 								<Table.Column>Condition</Table.Column>
+								<Table.Column>Uploaded At</Table.Column>
 								<Table.Column>Actions</Table.Column>
 							</Table.Header>
 							<Table.Body
-								items={artworks.artworks}
+								items={testData.artworks}
 								renderEmptyState={() => (
 									<div className="flex flex-col items-center justify-center p-4">
 										<p className="text-fg text-base mb-1 font-semibold">
@@ -152,6 +204,7 @@ function RouteComponent() {
 												className: "mt-4",
 												shape: "circle",
 											})}
+											to="/dashboard/artworks-new"
 										>
 											<Icons.ArtworkUpload />
 											Upload Artwork
@@ -174,6 +227,14 @@ function RouteComponent() {
 											</Badge>
 										</Table.Cell>
 										<Table.Cell>
+											{new Date(items.createdAt).toLocaleDateString("en-NG", {
+												day: "numeric",
+												month: "short",
+												year: "numeric",
+											})}
+										</Table.Cell>
+										<Table.Cell>
+											{/* Todo Add valid link to */}
 											<Link>View</Link>
 										</Table.Cell>
 									</Table.Row>
