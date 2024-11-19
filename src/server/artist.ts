@@ -234,6 +234,7 @@ export const getArtistRecentSales$ = createServerFn()
 const getArtistArtworksSchema = z.object({
 	page: z.number().min(1).default(1),
 	limit: z.number().min(1).max(100).default(10),
+	search: z.string().optional(),
 });
 
 export const getArtistArtworks$ = createServerFn()
@@ -241,7 +242,7 @@ export const getArtistArtworks$ = createServerFn()
 	.validator(getArtistArtworksSchema)
 	.handler(async ({ context, data }) => {
 		const { artist } = context;
-		const { page, limit } = data;
+		const { page, limit, search } = data;
 
 		const offset = (page - 1) * limit;
 
@@ -249,6 +250,14 @@ export const getArtistArtworks$ = createServerFn()
 			db
 				.selectFrom("artwork")
 				.where("artwork.artistId", "=", artist.id)
+				.where((eb) =>
+					search
+						? eb.or([
+								eb("artwork.title", "ilike", `%${search}%`),
+								eb("artwork.description", "ilike", `%${search}%`),
+							])
+						: eb.val(true),
+				)
 				.selectAll()
 				.limit(limit)
 				.offset(offset)

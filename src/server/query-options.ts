@@ -38,17 +38,20 @@ export const getArtistPendingOrdersQueryOptions = () =>
 	export const getArtistArtworkQueryOptions = ({
 		page,
 		limit,
+		search,
 	}: {
 		page: number;
 		limit: number;
+		search?: string;
 	}) =>
 		queryOptions({
-			queryKey: ["artist-artwork"],
+			queryKey: ["artist-artwork", page, limit, search],
 			queryFn: async () => {
 				const res = await getArtistArtworks$({
 					data: {
 						page,
 						limit,
+						search,
 					},
 				});
 				return res;
