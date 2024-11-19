@@ -1,4 +1,4 @@
-import * as React from "react"
+import type * as React from "react"
 
 import { cn } from "@/utils/classes"
 import { tv } from "tailwind-variants"
@@ -29,6 +29,10 @@ interface HeaderProps extends React.HTMLAttributes<HTMLDivElement> {
   title?: string
   description?: string
   withoutPadding?: boolean
+  classNames?: {
+    title?: string
+    description?: string
+  }
 }
 
 const Header = ({
@@ -37,12 +41,13 @@ const Header = ({
   title,
   description,
   children,
+  classNames,
   ...props
 }: HeaderProps) => (
   <div className={header({ className: cn(className, withoutPadding && "px-0 pt-0") })} {...props}>
-    {title && <Title>{title}</Title>}
-    {description && <Description>{description}</Description>}
-    {!title && typeof children === "string" ? <Title>{children}</Title> : children}
+    {title && <Title className={classNames?.title}>{title}</Title>}
+    {description && <Description className={classNames?.description}>{description}</Description>}
+    {!title && typeof children === "string" ? <Title className={classNames?.title}>{children}</Title> : children}
   </div>
 )
 

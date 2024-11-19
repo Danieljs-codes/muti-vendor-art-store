@@ -94,7 +94,6 @@ model order {
   userId         String
   user           user           @relation(fields: [userId], references: [id])
   totalPrice     Float
-  status         OrderStatus
   shippingStatus ShippingStatus @default(PENDING)
   createdAt      DateTime       @db.Date
   updatedAt      DateTime       @db.Date
@@ -174,11 +173,7 @@ model category {
   artwork artwork[]
 }
 
-enum OrderStatus {
-  PENDING
-  PAID
-  CANCELLED
-}
+
 
 enum ShippingStatus {
   PENDING

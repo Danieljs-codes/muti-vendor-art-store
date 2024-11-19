@@ -3,7 +3,10 @@ import { createArtistProfileSchema } from "@/utils/schema";
 import { paystack } from "@server/paystack";
 import { createServerFn } from "@tanstack/start";
 import { db } from "./database";
-import { maybeArtistMiddleware } from "./middlewares/artist";
+import {
+	maybeArtistMiddleware,
+	validateArtistMiddleware,
+} from "./middlewares/artist";
 import { setCookieAndRedirect } from "./utils";
 import { z } from "zod";
 
@@ -108,24 +111,22 @@ export const getArtistPendingOrders$ = createServerFn()
     }
 
     const pendingOrders = await db
-      .selectFrom("order")
-      .innerJoin("orderItem", "orderItem.orderId", "order.id")
-      .innerJoin("artwork", "artwork.id", "orderItem.artworkId")
-      .where("artwork.artistId", "=", artist.id)
-      .where("order.status", "=", "PENDING")
-      .select([
-        "order.id",
-        "order.totalPrice",
-        "order.status",
-        "order.shippingStatus",
-        "orderItem.quantity",
-        "orderItem.price",
-        "orderItem.finalPrice",
-        "orderItem.platformFee",
-        "artwork.title",
-        "artwork.imageUrls",
-      ])
-      .execute();
+					.selectFrom("order")
+					.innerJoin("orderItem", "orderItem.orderId", "order.id")
+					.innerJoin("artwork", "artwork.id", "orderItem.artworkId")
+					.where("artwork.artistId", "=", artist.id)
+					.select([
+						"order.id",
+						"order.totalPrice",
+						"order.shippingStatus",
+						"orderItem.quantity",
+						"orderItem.price",
+						"orderItem.finalPrice",
+						"orderItem.platformFee",
+						"artwork.title",
+						"artwork.imageUrls",
+					])
+					.execute();
 
     return {
       success: true as const,
@@ -156,32 +157,30 @@ export const getArtistDashboardStats$ = createServerFn()
     }
 
     // Get total revenue from completed orders in the date range
-    const stats = await db
-      .selectFrom("order")
-      .innerJoin("orderItem", "orderItem.orderId", "order.id")
-      .innerJoin("artwork", "artwork.id", "orderItem.artworkId")
-      .where("artwork.artistId", "=", artist.id)
-      .where("order.status", "=", "PAID")
-      .where("order.createdAt", ">=", startDate)
-      .where("order.createdAt", "<=", endDate)
-      .select([
-        db.fn.sum("orderItem.finalPrice").as("totalRevenue"),
-        db.fn.count("order.id").distinct().as("totalOrders"),
-        db.fn.avg("orderItem.finalPrice").as("averageOrderValue"),
-      ])
-      .executeTakeFirst();
+				const stats = await db
+					.selectFrom("order")
+					.innerJoin("orderItem", "orderItem.orderId", "order.id")
+					.innerJoin("artwork", "artwork.id", "orderItem.artworkId")
+					.where("artwork.artistId", "=", artist.id)
+					.where("order.createdAt", ">=", startDate)
+					.where("order.createdAt", "<=", endDate)
+					.select([
+						db.fn.sum("orderItem.finalPrice").as("totalRevenue"),
+						db.fn.count("order.id").distinct().as("totalOrders"),
+						db.fn.avg("orderItem.finalPrice").as("averageOrderValue"),
+					])
+					.executeTakeFirst();
 
     // Get total artworks sold in the date range
-    const artworksSold = await db
-      .selectFrom("orderItem")
-      .innerJoin("order", "order.id", "orderItem.orderId")
-      .innerJoin("artwork", "artwork.id", "orderItem.artworkId")
-      .where("artwork.artistId", "=", artist.id)
-      .where("order.status", "=", "PAID")
-      .where("order.createdAt", ">=", startDate)
-      .where("order.createdAt", "<=", endDate)
-      .select(db.fn.sum("orderItem.quantity").as("totalArtworksSold"))
-      .executeTakeFirst();
+				const artworksSold = await db
+					.selectFrom("orderItem")
+					.innerJoin("order", "order.id", "orderItem.orderId")
+					.innerJoin("artwork", "artwork.id", "orderItem.artworkId")
+					.where("artwork.artistId", "=", artist.id)
+					.where("order.createdAt", ">=", startDate)
+					.where("order.createdAt", "<=", endDate)
+					.select(db.fn.sum("orderItem.quantity").as("totalArtworksSold"))
+					.executeTakeFirst();
 
     return {
       success: true as const,
@@ -193,3 +192,39 @@ export const getArtistDashboardStats$ = createServerFn()
       },
     };
   });
+
+	
+	export const getArtistRecentSales$ = createServerFn()
+		.middleware([validateArtistMiddleware])
+		.handler(async ({ context }) => {
+			const { artist } = context;
+
+			// Get artist last 5 sales
+			const sales = await db
+				.selectFrom("order")
+				.innerJoin("orderItem", "orderItem.orderId", "order.id")
+				.innerJoin("artwork", "artwork.id", "orderItem.artworkId")
+				.innerJoin("user", "user.id", "order.userId")
+				.where("artwork.artistId", "=", artist.id)
+				.select([
+					"order.id",
+					"order.totalPrice",
+					"order.shippingStatus",
+					"orderItem.quantity",
+					"orderItem.price",
+					"orderItem.finalPrice",
+					"orderItem.platformFee",
+					"artwork.title",
+					"artwork.imageUrls",
+					"user.name as customerName",
+					"user.email as customerEmail",
+				])
+				.orderBy("order.createdAt", "desc")
+				.limit(5)
+				.execute();
+
+			return {
+				success: true as const,
+				data: sales,
+			};
+		});

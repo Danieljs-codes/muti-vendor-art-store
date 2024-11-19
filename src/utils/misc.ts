@@ -39,3 +39,6 @@ export const formatCurrency = ({
 		currency: "NGN",
 	}).format(amountInNaira);
 };
+
+export const sleep = (ms: number) =>
+	new Promise((resolve) => setTimeout(resolve, ms));

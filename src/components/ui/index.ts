@@ -36,3 +36,5 @@ export * from './date-picker';
 export * from './calendar';
 export * from './date-field';
 export * from './range-calendar';
+export * from './table';
+export * from './skeleton';

@@ -4,7 +4,7 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   : ColumnType<T, T | undefined, T>;
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
-import type { OrderStatus, ShippingStatus, CategoryName } from "./enums";
+import type { ShippingStatus, CategoryName } from "./enums";
 
 export type account = {
     id: string;
@@ -78,7 +78,6 @@ export type order = {
     id: string;
     userId: string;
     totalPrice: number;
-    status: OrderStatus;
     shippingStatus: Generated<ShippingStatus>;
     createdAt: Timestamp;
     updatedAt: Timestamp;
