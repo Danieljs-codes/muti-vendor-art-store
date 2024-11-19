@@ -22,3 +22,9 @@ export const ArtCondition = {
     POOR: "POOR"
 } as const;
 export type ArtCondition = (typeof ArtCondition)[keyof typeof ArtCondition];
+export const UploadStatus = {
+    PENDING: "PENDING",
+    COMPLETED: "COMPLETED",
+    FAILED: "FAILED"
+} as const;
+export type UploadStatus = (typeof UploadStatus)[keyof typeof UploadStatus];

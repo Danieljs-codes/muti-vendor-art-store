@@ -56,4 +56,13 @@ export const ARTWORK_CATEGORIES = [
 	"OTHER",
 ] as const;
 
+export const ARTWORK_CONDITIONS = ["NEW", "LIKE_NEW", "GOOD", "FAIR"] as const;
+
 export type ArtworkCategory = (typeof ARTWORK_CATEGORIES)[number];
+
+export const camelCaseToTitleCase = (str: string) => {
+	return str
+		.split("_")
+		.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+		.join(" ");
+};

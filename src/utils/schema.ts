@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ARTWORK_CATEGORIES } from "./misc";
+import { ARTWORK_CATEGORIES, ARTWORK_CONDITIONS } from "./misc";
 
 export const signInSchema = z.object({
 	email: z.string().email({ message: "Invalid email address" }),
@@ -59,7 +59,11 @@ export const createArtworkSchema = z.object({
 	description: z
 		.string()
 		.min(10, { message: "Description must be at least 10 characters" }),
-	price: z.number().positive({ message: "Price must be greater than 0" }),
+	price: z
+		.number({
+			required_error: "Price is required",
+		})
+		.positive({ message: "Price must be greater than 0" }),
 	imageUrls: z
 		.array(z.string().url({ message: "Invalid image URL" }))
 		.min(1, { message: "At least one image is required" }),
@@ -68,11 +72,9 @@ export const createArtworkSchema = z.object({
 		.regex(/^\d+(\.\d+)?\s*x\s*\d+(\.\d+)?\s*x\s*\d+(\.\d+)?$/, {
 			message: "Dimensions must be in format: length x width x height",
 		}),
-	weight: z
-		.number()
-		.positive({ message: "Weight must be greater than 0" })
-		.optional(),
-	condition: z.enum(["NEW", "LIKE_NEW", "GOOD", "FAIR"]),
-	stock: z.number().int().positive({ message: "Stock must be greater than 0" }),
+	unlimitedStock: z.boolean().default(false),
+	stock: z.number().nullable().default(null),
+	weight: z.number().positive({ message: "Weight must be greater than 0" }),
+	condition: z.enum(ARTWORK_CONDITIONS),
 	category: z.enum(ARTWORK_CATEGORIES),
 });

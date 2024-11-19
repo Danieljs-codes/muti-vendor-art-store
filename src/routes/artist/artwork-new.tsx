@@ -1,8 +1,22 @@
+import {
+	ARTWORK_CATEGORIES,
+	ARTWORK_CONDITIONS,
+	camelCaseToTitleCase,
+} from "@/utils/misc";
 import { createArtworkSchema } from "@/utils/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createFileRoute } from "@tanstack/react-router";
-import { Controller, useForm } from "react-hook-form";
-import { Card, NumberField, Textarea, TextField } from "ui";
+import { Controller, useForm, useWatch } from "react-hook-form";
+import {
+	Button,
+	Card,
+	Checkbox,
+	NumberField,
+	Select,
+	Textarea,
+	TextField,
+} from "ui";
+import type { z } from "zod";
 
 export const Route = createFileRoute(
 	"/_dashboard-layout-id/dashboard/artworks-new",
@@ -11,9 +25,30 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
-	const { control } = useForm({
+	const {
+		control,
+		formState: { errors },
+		handleSubmit,
+		setValue,
+		watch,
+	} = useForm<z.infer<typeof createArtworkSchema>>({
 		resolver: zodResolver(createArtworkSchema),
+		defaultValues: {
+			title: "",
+			description: "",
+			category: undefined,
+			weight: undefined,
+			dimensions: "",
+			price: undefined,
+			condition: undefined,
+			stock: undefined,
+			unlimitedStock: false,
+		},
 	});
+
+  const onSubmit = (data: z.infer<typeof createArtworkSchema>) => {
+			console.log(data);
+		};
 
 	return (
 		<div>
@@ -23,7 +58,7 @@ function RouteComponent() {
 					<Card.Description>Create a new artwork</Card.Description>
 				</Card.Header>
 				<Card.Content>
-					<form method="POST">
+					<form method="POST" onSubmit={handleSubmit(onSubmit)}>
 						<div className="space-y-4">
 							<Controller
 								control={control}
@@ -32,6 +67,8 @@ function RouteComponent() {
 									<TextField
 										label="Title"
 										placeholder="Enter artwork title"
+										isInvalid={!!errors.title}
+										errorMessage={errors.title?.message}
 										{...field}
 									/>
 								)}
@@ -44,6 +81,8 @@ function RouteComponent() {
 										label="Description"
 										placeholder="Enter artwork description"
 										className="min-h-[5rem]"
+										isInvalid={!!errors.description}
+										errorMessage={errors.description?.message}
 										{...field}
 									/>
 								)}
@@ -61,6 +100,8 @@ function RouteComponent() {
 											currency: "NGN",
 											currencyDisplay: "narrowSymbol",
 										}}
+										isInvalid={!!errors.price}
+										errorMessage={errors.price?.message}
 										{...field}
 									/>
 								)}
@@ -71,8 +112,10 @@ function RouteComponent() {
 								render={({ field }) => (
 									<TextField
 										label="Dimensions"
-										description="Length x Width x Height"
+										description="Length x Width x Height (in inches)"
 										descriptionClassName="text-muted-fg text-xs"
+										isInvalid={!!errors.dimensions}
+										errorMessage={errors.dimensions?.message}
 										{...field}
 									/>
 								)}
@@ -90,17 +133,110 @@ function RouteComponent() {
 											unit: "kilogram",
 											unitDisplay: "narrow",
 										}}
+										isInvalid={!!errors.weight}
+										errorMessage={errors.weight?.message}
 										{...field}
 									/>
 								)}
 							/>
+							{!watch("unlimitedStock") && (
+								<Controller
+									control={control}
+									name="stock"
+									render={({ field: { value, ...field } }) => (
+										<NumberField
+											label="Quantity"
+											step={1}
+											minValue={1}
+											value={value ?? undefined}
+											{...field}
+										/>
+									)}
+								/>
+							)}
 							<Controller
 								control={control}
-								name="stock"
-								render={({ field }) => (
-									<NumberField label="Quantity" step={1} {...field} />
+								name="unlimitedStock"
+								render={({ field: { value, onChange, ...rest } }) => (
+									<Checkbox
+										{...rest}
+										isSelected={value}
+										onChange={(value) => {
+											onChange(value);
+											if (value) {
+												setValue("stock", null);
+											} else {
+												setValue("stock", 1);
+											}
+										}}
+									>
+										Unlimited Stock
+									</Checkbox>
 								)}
 							/>
+							<Controller
+								control={control}
+								name="category"
+								render={({ field: { ref, ...field } }) => (
+									<Select
+										label="Category"
+										placeholder="Select a category"
+										{...field}
+										selectRef={ref}
+									>
+										<Select.Trigger />
+										<Select.List
+											items={ARTWORK_CATEGORIES.map((category) => ({
+												value: category,
+												label: category,
+											}))}
+										>
+											{(category) => (
+												<Select.Option
+													id={category.value}
+													textValue={category.label}
+													className="text-sm capitalize"
+												>
+													{camelCaseToTitleCase(category.label.toLowerCase())}
+												</Select.Option>
+											)}
+										</Select.List>
+									</Select>
+								)}
+							/>
+							<Controller
+								control={control}
+								name="condition"
+								render={({ field: { ref, ...field } }) => (
+									<Select
+										label="Condition"
+										placeholder="Select artwork condition"
+										{...field}
+										selectRef={ref}
+									>
+										<Select.Trigger />
+										<Select.List
+											items={ARTWORK_CONDITIONS.map((condition) => ({
+												value: condition,
+												label: condition,
+											}))}
+										>
+											{(condition) => (
+												<Select.Option
+													id={condition.value}
+													textValue={condition.label}
+													className="text-sm capitalize"
+												>
+													{camelCaseToTitleCase(condition.label.toLowerCase())}
+												</Select.Option>
+											)}
+										</Select.List>
+									</Select>
+								)}
+							/>
+						</div>
+						<div className="flex justify-end mt-6">
+							<Button type="submit">Submit</Button>
 						</div>
 					</form>
 				</Card.Content>

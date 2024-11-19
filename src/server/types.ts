@@ -4,7 +4,7 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   : ColumnType<T, T | undefined, T>;
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
-import type { ShippingStatus, CategoryName, ArtCondition } from "./enums";
+import type { ShippingStatus, CategoryName, ArtCondition, UploadStatus } from "./enums";
 
 export type account = {
     id: string;
@@ -36,12 +36,11 @@ export type artwork = {
     dimensions: string;
     weight: number | null;
     condition: ArtCondition;
-    stock: number;
+    stock: number | null;
     createdAt: Timestamp;
     updatedAt: Timestamp;
     artistId: string;
     category: CategoryName;
-    categoryId: string;
 };
 export type artworkTocart = {
     A: string;
@@ -104,6 +103,24 @@ export type review = {
     userId: string;
     artworkId: string;
 };
+export type scheduledUpload = {
+    id: string;
+    title: string;
+    description: string;
+    price: number;
+    imageUrls: string[];
+    dimensions: string;
+    weight: number | null;
+    condition: ArtCondition;
+    stock: number;
+    scheduledAt: Timestamp;
+    status: Generated<UploadStatus>;
+    createdAt: Timestamp;
+    updatedAt: Timestamp;
+    artistId: string;
+    category: CategoryName;
+    categoryId: string;
+};
 export type session = {
     id: string;
     expiresAt: Timestamp;
@@ -145,6 +162,7 @@ export type DB = {
     order: order;
     orderItem: orderItem;
     review: review;
+    scheduledUpload: scheduledUpload;
     session: session;
     user: user;
     verification: verification;
