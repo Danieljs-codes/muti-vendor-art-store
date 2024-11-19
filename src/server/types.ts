@@ -4,7 +4,7 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   : ColumnType<T, T | undefined, T>;
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
-import type { ShippingStatus, CategoryName } from "./enums";
+import type { ShippingStatus, CategoryName, ArtCondition } from "./enums";
 
 export type account = {
     id: string;
@@ -33,9 +33,14 @@ export type artwork = {
     description: string;
     price: number;
     imageUrls: string[];
+    dimensions: string;
+    weight: number | null;
+    condition: ArtCondition;
+    stock: number;
     createdAt: Timestamp;
     updatedAt: Timestamp;
     artistId: string;
+    category: CategoryName;
     categoryId: string;
 };
 export type artworkTocart = {
@@ -55,10 +60,6 @@ export type cart = {
     userId: string;
     createdAt: Timestamp;
     updatedAt: Timestamp;
-};
-export type category = {
-    id: string;
-    name: CategoryName;
 };
 export type discount = {
     id: string;
@@ -140,7 +141,6 @@ export type DB = {
     artist: artist;
     artwork: artwork;
     cart: cart;
-    category: category;
     discount: discount;
     order: order;
     orderItem: orderItem;

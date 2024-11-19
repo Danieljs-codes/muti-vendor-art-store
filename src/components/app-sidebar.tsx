@@ -17,6 +17,7 @@ import { useTheme } from "next-themes";
 import { Avatar, Button, Link, Menu, Sidebar } from "ui";
 import { Icons } from "./icons";
 import { Logo } from "./logo";
+import { useLocation } from "@tanstack/react-router";
 
 type User = Omit<
 	(typeof authClient.$Infer.Session)["user"],
@@ -30,6 +31,7 @@ export function AppSidebar({
 	user: User;
 	pendingOrders: number;
 }) {
+	const { pathname } = useLocation();
 	const { theme, setTheme } = useTheme();
 
 	const toggleTheme = () => {
@@ -53,23 +55,40 @@ export function AppSidebar({
 			</Sidebar.Header>
 			<Sidebar.Content>
 				<Sidebar.Section>
-					<Sidebar.Item isCurrent icon={IconDashboard} href="/">
+					<Sidebar.Item
+						icon={IconDashboard}
+						href="/dashboard/overview"
+						isCurrent={pathname.includes("overview")}
+					>
 						Overview
 					</Sidebar.Item>
-					<Sidebar.Item icon={Icons.Artwork} href="/">
+					<Sidebar.Item
+						icon={Icons.Artwork}
+						href="/dashboard/artworks"
+						isCurrent={pathname.includes("artworks")}
+					>
 						Artworks
 					</Sidebar.Item>
 					<Sidebar.Item
 						icon={Icons.Orders}
 						href="/"
+						isCurrent={pathname.includes("orders")}
 						badge={String(pendingOrders)}
 					>
 						Orders
 					</Sidebar.Item>
-					<Sidebar.Item icon={Icons.Discount} href="/">
+					<Sidebar.Item
+						icon={Icons.Discount}
+						href="/"
+						isCurrent={pathname.includes("discounts")}
+					>
 						Discounts
 					</Sidebar.Item>
-					<Sidebar.Item icon={Icons.Analytics} href="/">
+					<Sidebar.Item
+						icon={Icons.Analytics}
+						href="/"
+						isCurrent={pathname.includes("analytics")}
+					>
 						Analytics
 					</Sidebar.Item>
 				</Sidebar.Section>

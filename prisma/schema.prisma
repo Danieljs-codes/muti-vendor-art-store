@@ -71,21 +71,25 @@ model artist {
 }
 
 model artwork {
-  id          String      @id
+  id          String       @id
   title       String
   description String
   price       Float
   imageUrls   String[]
-  createdAt   DateTime    @db.Date
-  updatedAt   DateTime    @db.Date
+  dimensions  String // format: "length x width x height"
+  weight      Float?
+  condition   ArtCondition
+  stock       Int
+  createdAt   DateTime     @db.Date
+  updatedAt   DateTime     @db.Date
   artistId    String
-  artist      artist      @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  artist      artist       @relation(fields: [artistId], references: [id], onDelete: Cascade)
   orderItem   orderItem[]
   cart        cart[]
   wishlist    wishlist[]
   discount    discount[]
   review      review[]
-  category    category    @relation(fields: [categoryId], references: [id])
+  category    CategoryName
   categoryId  String
 }
 
@@ -167,14 +171,6 @@ model review {
   artwork   artwork  @relation(fields: [artworkId], references: [id])
 }
 
-model category {
-  id      String       @id
-  name    CategoryName
-  artwork artwork[]
-}
-
-
-
 enum ShippingStatus {
   PENDING
   SHIPPED
@@ -189,4 +185,12 @@ enum CategoryName {
   DRAWING
   PRINTMAKING
   OTHER
+}
+
+enum ArtCondition {
+  MINT
+  EXCELLENT
+  GOOD
+  FAIR
+  POOR
 }

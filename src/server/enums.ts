@@ -14,3 +14,11 @@ export const CategoryName = {
     OTHER: "OTHER"
 } as const;
 export type CategoryName = (typeof CategoryName)[keyof typeof CategoryName];
+export const ArtCondition = {
+    MINT: "MINT",
+    EXCELLENT: "EXCELLENT",
+    GOOD: "GOOD",
+    FAIR: "FAIR",
+    POOR: "POOR"
+} as const;
+export type ArtCondition = (typeof ArtCondition)[keyof typeof ArtCondition];

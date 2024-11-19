@@ -195,8 +195,8 @@ function RouteComponent() {
 			</div>
 			<div className="mt-6">
 				<Card.Header
-					title="Total Artworks Sold"
-					description="Total number of artworks sold"
+					title="Recent Sales"
+					description="Overview of your most recent transactions"
 					withoutPadding
 					classNames={{
 						title: "text-base",

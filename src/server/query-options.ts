@@ -1,5 +1,10 @@
 import { queryOptions } from "@tanstack/react-query";
-import { getArtistDashboardStats$, getArtistPendingOrders$, getArtistRecentSales$ } from "./artist";
+import {
+	getArtistArtworks$,
+	getArtistDashboardStats$,
+	getArtistPendingOrders$,
+	getArtistRecentSales$,
+} from "./artist";
 
 export const getArtistPendingOrdersQueryOptions = () =>
 	queryOptions({
@@ -29,3 +34,24 @@ export const getArtistPendingOrdersQueryOptions = () =>
 		queryFn: async() => await getArtistRecentSales$(),
 		select: (data) =>  data.data
 	});
+
+	export const getArtistArtworkQueryOptions = ({
+		page,
+		limit,
+	}: {
+		page: number;
+		limit: number;
+	}) =>
+		queryOptions({
+			queryKey: ["artist-artwork"],
+			queryFn: async () => {
+				const res = await getArtistArtworks$({
+					data: {
+						page,
+						limit,
+					},
+				});
+				return res;
+			},
+			select: (data) => data.data,
+		});

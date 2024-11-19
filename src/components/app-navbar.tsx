@@ -90,7 +90,12 @@ export const AppNavbar = ({
 								aria-label="Open Menu"
 								className="group gap-x-2 flex items-center"
 							>
-								<Avatar alt="slash" size="small" shape="square" initials="IP" />
+								<Avatar
+									alt="slash"
+									size="small"
+									shape="square"
+									initials={user.name[0]}
+								/>
 								<IconChevronLgDown className="size-4 group-pressed:rotate-180 transition-transform" />
 							</Menu.Trigger>
 							<Menu.Content
