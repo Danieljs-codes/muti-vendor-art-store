@@ -42,3 +42,18 @@ export const formatCurrency = ({
 
 export const sleep = (ms: number) =>
 	new Promise((resolve) => setTimeout(resolve, ms));
+
+export const ARTWORK_CATEGORIES = [
+	"PAINTING",
+	"SCULPTURE",
+	"PHOTOGRAPHY",
+	"DIGITAL",
+	"MIXED_MEDIA",
+	"DRAWING",
+	"PRINTMAKING",
+	"TEXTILE",
+	"CERAMIC",
+	"OTHER",
+] as const;
+
+export type ArtworkCategory = (typeof ARTWORK_CATEGORIES)[number];

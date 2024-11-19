@@ -94,6 +94,13 @@ function RouteComponent() {
 									/>
 								)}
 							/>
+							<Controller
+								control={control}
+								name="stock"
+								render={({ field }) => (
+									<NumberField label="Quantity" step={1} {...field} />
+								)}
+							/>
 						</div>
 					</form>
 				</Card.Content>

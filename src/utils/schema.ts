@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { ARTWORK_CATEGORIES } from "./misc";
 
 export const signInSchema = z.object({
 	email: z.string().email({ message: "Invalid email address" }),
@@ -73,16 +74,5 @@ export const createArtworkSchema = z.object({
 		.optional(),
 	condition: z.enum(["NEW", "LIKE_NEW", "GOOD", "FAIR"]),
 	stock: z.number().int().positive({ message: "Stock must be greater than 0" }),
-	category: z.enum([
-		"PAINTING",
-		"SCULPTURE",
-		"PHOTOGRAPHY",
-		"DIGITAL",
-		"MIXED_MEDIA",
-		"DRAWING",
-		"PRINTMAKING",
-		"TEXTILE",
-		"CERAMIC",
-		"OTHER",
-	]),
+	category: z.enum(ARTWORK_CATEGORIES),
 });
