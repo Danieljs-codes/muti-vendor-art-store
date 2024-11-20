@@ -61,15 +61,15 @@ export const generateBlurhash = createServerFn()
 			const { data: pixels, info: metadata } = await Sharp(imageBuffer)
 				.raw()
 				.ensureAlpha()
-				.resize(64, 64, { fit: "inside" })
+				.resize(32, 32, { fit: "inside" })
 				.toBuffer({ resolveWithObject: true });
 
 			const blurhash = encode(
 				new Uint8ClampedArray(pixels),
 				metadata.width,
 				metadata.height,
-				6, // componentX: increased horizontal detail
-				5, // componentY: increased vertical detail for better quality
+				4, // componentX: reduced for lower quality
+				3, // componentY: reduced for lower quality
 			);
 
 			return blurhash;
