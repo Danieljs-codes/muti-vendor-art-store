@@ -10,7 +10,7 @@ import {
 	maybeArtistMiddleware,
 	validateArtistMiddleware,
 } from "./middlewares/artist";
-import { setCookieAndRedirect } from "./utils";
+import { generateBlurhash, setCookieAndRedirect } from "./utils";
 import { z } from "zod";
 import { omit } from "@/utils/misc";
 import { utapi } from "./uploadthing";
@@ -189,7 +189,8 @@ export const getArtistDashboardStats$ = createServerFn()
 			.where("order.createdAt", ">=", startDate)
 			.where("order.createdAt", "<=", endDate)
 			.select(db.fn.sum("orderItem.quantity").as("totalArtworksSold"))
-			.executeTakeFirst();
+			.executeTakeFirstOrThrow()
+			.then((result) => Number(result.totalArtworksSold));
 
 		return {
 			success: true as const,
@@ -197,7 +198,7 @@ export const getArtistDashboardStats$ = createServerFn()
 				totalRevenue: Number(stats?.totalRevenue || 0),
 				totalOrders: Number(stats?.totalOrders || 0),
 				averageOrderValue: Number(stats?.averageOrderValue || 0),
-				totalArtworksSold: Number(artworksSold?.totalArtworksSold || 0),
+				totalArtworksSold: artworksSold,
 			},
 		};
 	});
@@ -300,13 +301,23 @@ export const createArtistArtwork = createServerFn()
 			throw new Error("Invalid form data");
 		}
 		const formData = Object.fromEntries(data.entries());
-		const validatedData = createArtworkFormSchema.parse({
+		const validatedFormData = createArtworkFormSchema.parse({
 			...formData,
 			images: data.getAll("images"),
 		});
 
+		// Transform to match createArtworkSchema
 		return {
-			...validatedData,
+			title: validatedFormData.title,
+			description: validatedFormData.description,
+			price: Number(validatedFormData.price),
+			dimensions: validatedFormData.dimensions,
+			weight: Number(validatedFormData.weight),
+			condition: validatedFormData.condition,
+			category: validatedFormData.category,
+			isUnlimitedStock: validatedFormData.isUnlimitedStock,
+			stock: validatedFormData.stock,
+			images: validatedFormData.images,
 		};
 	})
 	.handler(async ({ data, context }) => {
@@ -315,5 +326,60 @@ export const createArtistArtwork = createServerFn()
 		// Upload the images to uploadthing
 		const response = await utapi.uploadFiles(data.images);
 
+		// Process each uploaded image
+		const processedImages = await Promise.all(
+			response.map(async (file) => {
+				if (file.error) {
+					throw new Error("Failed to upload image");
+				}
+				const blurhash = await generateBlurhash({
+					data: { imageBufferOrUrl: file.data.url },
+				});
+
+				return {
+					blurhash,
+					...file.data,
+				};
+			}),
+		);
+
 		// Create the artwork
+		const artwork = await db
+			.insertInto("artwork")
+			.values({
+				id: crypto.randomUUID(),
+				title: data.title,
+				description: data.description,
+				price: data.price,
+				dimensions: data.dimensions,
+				weight: data.weight,
+				condition: data.condition,
+				stock: data.isUnlimitedStock ? null : data.stock,
+				artistId: artist.id,
+				category: data.category,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			})
+			.returningAll()
+			.executeTakeFirstOrThrow();
+
+		// Create the artwork images
+		await db
+			.insertInto("image")
+			.values(
+				processedImages.map((image) => ({
+					id: crypto.randomUUID(),
+					url: image.url,
+					blurhash: image.blurhash,
+					artworkId: artwork.id,
+				})),
+			)
+			.execute();
+
+		return {
+			success: true as const,
+			data: {
+				artwork,
+			},
+		};
 	});

@@ -6,12 +6,16 @@ import {
 import { createArtworkSchema } from "@/utils/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createFileRoute } from "@tanstack/react-router";
+import { IconX } from "justd-icons";
 import { useEffect, useState } from "react";
-import { Controller, useForm, useWatch } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import {
 	Button,
 	Card,
 	Checkbox,
+	Description,
+	FileTrigger,
+	Label,
 	NumberField,
 	Select,
 	Textarea,
@@ -27,6 +31,7 @@ export const Route = createFileRoute(
 
 function RouteComponent() {
 	const [previousStock, setPreviousStock] = useState<number | null>(null);
+	const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([]);
 	const {
 		control,
 		formState: { errors },
@@ -53,13 +58,11 @@ function RouteComponent() {
 		console.log(data);
 	};
 
-	const unlimitedStock = watch("isUnlimitedStock");
-	const stock = watch("stock");
+	const images = watch("images");
 
 	useEffect(() => {
-		console.log(errors);
-		console.log(unlimitedStock, stock);
-	}, [errors, unlimitedStock, stock]);
+		console.log(images);
+	}, [images]);
 
 	return (
 		<div>
@@ -261,6 +264,67 @@ function RouteComponent() {
 											)}
 										</Select.List>
 									</Select>
+								)}
+							/>
+							<Controller
+								control={control}
+								name="images"
+								render={({ field: { onChange, value, ...field } }) => (
+									<div>
+										<Label className="block mb-1.5">Artwork Images</Label>
+										<FileTrigger
+											onSelect={(files) => {
+												const fileList = Array.from(files ?? []);
+												onChange(fileList);
+												// Create preview URLs for the images
+												const urls = fileList.map((file) =>
+													URL.createObjectURL(file),
+												);
+												setImagePreviewUrls(urls);
+											}}
+											allowsMultiple
+											{...field}
+											size="small"
+										>
+											Upload Artworks
+										</FileTrigger>
+										<Description className="block mb-3 text-xs mt-1">
+											Minimum of 3 images and maximum of 4
+										</Description>
+										{value && value.length > 0 && (
+											<div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+												{Array.from(value).map((file, index) => (
+													// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+													<div key={index} className="relative group">
+														<img
+															src={imagePreviewUrls[index]}
+															alt={`Preview ${index + 1}`}
+															className="w-full h-32 object-cover rounded-lg"
+														/>
+														<Button
+															type="button"
+															intent="danger"
+															shape="circle"
+															size="square-petite"
+															className="absolute top-2 right-2 size-7"
+															onPress={() => {
+																const newFiles = Array.from(value).filter(
+																	(_, i) => i !== index,
+																);
+																onChange(newFiles);
+																const newUrls = imagePreviewUrls.filter(
+																	(_, i) => i !== index,
+																);
+																setImagePreviewUrls(newUrls);
+															}}
+														>
+															<IconX />
+														</Button>
+													</div>
+												))}
+											</div>
+										)}
+									</div>
 								)}
 							/>
 						</div>

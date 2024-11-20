@@ -98,6 +98,10 @@ const artworkBaseSchema = z.object({
 	weight: z.number().positive({ message: "Weight must be greater than 0" }),
 	condition: z.enum(ARTWORK_CONDITIONS),
 	category: z.enum(ARTWORK_CATEGORIES),
+	images: z
+		.array(z.instanceof(File))
+		.min(2, { message: "At least 2 images are required" })
+		.max(4, { message: "Maximum of 4 images allowed" }),
 });
 
 export const createArtworkSchema = z.intersection(

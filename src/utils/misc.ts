@@ -56,7 +56,13 @@ export const ARTWORK_CATEGORIES = [
 	"OTHER",
 ] as const;
 
-export const ARTWORK_CONDITIONS = ["NEW", "LIKE_NEW", "GOOD", "FAIR"] as const;
+export const ARTWORK_CONDITIONS = [
+	"MINT",
+	"EXCELLENT",
+	"GOOD",
+	"FAIR",
+	"POOR",
+] as const;
 
 export type ArtworkCategory = (typeof ARTWORK_CATEGORIES)[number];
 

@@ -8,9 +8,12 @@ export const CategoryName = {
     PAINTING: "PAINTING",
     SCULPTURE: "SCULPTURE",
     PHOTOGRAPHY: "PHOTOGRAPHY",
-    DIGITAL_ART: "DIGITAL_ART",
+    DIGITAL: "DIGITAL",
+    MIXED_MEDIA: "MIXED_MEDIA",
     DRAWING: "DRAWING",
     PRINTMAKING: "PRINTMAKING",
+    TEXTILE: "TEXTILE",
+    CERAMIC: "CERAMIC",
     OTHER: "OTHER"
 } as const;
 export type CategoryName = (typeof CategoryName)[keyof typeof CategoryName];
