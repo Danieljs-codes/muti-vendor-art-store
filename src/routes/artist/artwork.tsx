@@ -199,8 +199,9 @@ function RouteComponent() {
 											No artworks found
 										</p>
 										<p className="text-muted-fg text-sm">
-											You haven't uploaded any artworks yet. Start by adding
-											your first artwork.
+											{search.trim().length > 0
+												? `No artworks found for search term "${search}".`
+												: "You haven't uploaded any artworks yet. Start by adding your first artwork."}
 										</p>
 										<Link
 											className={buttonStyles({

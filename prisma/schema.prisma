@@ -86,6 +86,7 @@ model artwork {
   title       String
   description String
   price       Float
+  views       Int          @default(0)
   images      image[]
   dimensions  String // format: "length x width x height"
   weight      Float?

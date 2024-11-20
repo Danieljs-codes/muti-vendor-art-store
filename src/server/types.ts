@@ -32,6 +32,7 @@ export type artwork = {
     title: string;
     description: string;
     price: number;
+    views: Generated<number>;
     dimensions: string;
     weight: number | null;
     condition: ArtCondition;
