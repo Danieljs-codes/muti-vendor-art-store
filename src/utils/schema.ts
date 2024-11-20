@@ -54,7 +54,25 @@ export const createArtistProfileSchema = z.object({
 	bankCode: z.string().min(1, { message: "Bank code is required" }),
 });
 
-export const createArtworkSchema = z.object({
+// https://github.com/colinhacks/zod/issues/479
+const stockSchema = z
+	.object({
+		isUnlimitedStock: z.boolean().default(false),
+		stock: z.number().nullable().default(null),
+	})
+	.refine(
+		(data) => {
+			console.log(data);
+			if (data.isUnlimitedStock) return true;
+			return typeof data.stock === "number" && data.stock > 0;
+		},
+		{
+			message: "Enable unlimited stock or specify a valid quantity",
+			path: ["stock"],
+		},
+	);
+
+const artworkBaseSchema = z.object({
 	title: z.string().min(3, { message: "Title must be at least 3 characters" }),
 	description: z
 		.string()
@@ -72,9 +90,12 @@ export const createArtworkSchema = z.object({
 		.regex(/^\d+(\.\d+)?\s*x\s*\d+(\.\d+)?\s*x\s*\d+(\.\d+)?$/, {
 			message: "Dimensions must be in format: length x width x height",
 		}),
-	unlimitedStock: z.boolean().default(false),
-	stock: z.number().nullable().default(null),
 	weight: z.number().positive({ message: "Weight must be greater than 0" }),
 	condition: z.enum(ARTWORK_CONDITIONS),
 	category: z.enum(ARTWORK_CATEGORIES),
 });
+
+export const createArtworkSchema = z.intersection(
+	artworkBaseSchema,
+	stockSchema,
+);

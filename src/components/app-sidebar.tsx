@@ -93,7 +93,7 @@ export function AppSidebar({
 					</Sidebar.Item>
 				</Sidebar.Section>
 				<Sidebar.Section collapsible title="Shortcuts">
-					<Sidebar.Item icon={IconPlus} href="/">
+					<Sidebar.Item icon={IconPlus} href="/dashboard/artworks-new">
 						Upload Artwork
 					</Sidebar.Item>
 					<Sidebar.Item icon={Icons.TimeSchedule} href="/">

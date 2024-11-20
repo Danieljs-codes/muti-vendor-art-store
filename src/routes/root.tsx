@@ -43,7 +43,7 @@ export const Route = createRootRouteWithContext<{
 						RefreshRuntime.injectIntoGlobalHook(window)
 						window.$RefreshReg$ = () => {}
 						window.$RefreshSig$ = () => (type) => type
-	  				`,
+						`,
 					},
 				],
 	}),
