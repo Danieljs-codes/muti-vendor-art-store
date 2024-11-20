@@ -58,7 +58,12 @@ export const createArtistProfileSchema = z.object({
 const stockSchema = z
 	.object({
 		isUnlimitedStock: z.boolean().default(false),
-		stock: z.number().nullable().default(null),
+		stock: z
+			.number({
+				invalid_type_error: "A number is required",
+			})
+			.nullable()
+			.default(null),
 	})
 	.refine(
 		(data) => {
@@ -99,3 +104,39 @@ export const createArtworkSchema = z.intersection(
 	artworkBaseSchema,
 	stockSchema,
 );
+
+export const createArtworkFormSchema = z.object({
+	title: z.string().min(3, { message: "Title must be at least 3 characters" }),
+	description: z
+		.string()
+		.min(10, { message: "Description must be at least 10 characters" }),
+	price: z
+		.string()
+		.refine((val) => !Number.isNaN(Number(val)) && Number(val) > 0, {
+			message: "Price must be a valid number greater than 0",
+		}),
+	dimensions: z
+		.string()
+		.regex(/^\d+(\.\d+)?\s*x\s*\d+(\.\d+)?\s*x\s*\d+(\.\d+)?$/, {
+			message: "Dimensions must be in format: length x width x height",
+		}),
+	weight: z
+		.string()
+		.refine((val) => !Number.isNaN(Number(val)) && Number(val) > 0, {
+			message: "Weight must be a valid number greater than 0",
+		}),
+	condition: z.enum(ARTWORK_CONDITIONS),
+	category: z.enum(ARTWORK_CATEGORIES),
+	isUnlimitedStock: z.string().transform((val) => val === "true"),
+	stock: z
+		.string()
+		.nullable()
+		.refine(
+			(val) => val === null || (!Number.isNaN(Number(val)) && Number(val) > 0),
+			{
+				message: "Stock must be a valid number greater than 0",
+			},
+		)
+		.transform((val) => (val ? Number(val) : null))
+		.default(null),
+});
