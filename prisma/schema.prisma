@@ -71,12 +71,22 @@ model artist {
   scheduledUpload        scheduledUpload[]
 }
 
+model image {
+  id                String           @id
+  url               String
+  blurhash          String
+  artwork           artwork?         @relation(fields: [artworkId], references: [id], onDelete: Cascade)
+  artworkId         String?
+  scheduledUpload   scheduledUpload? @relation(fields: [scheduledUploadId], references: [id], onDelete: Cascade)
+  scheduledUploadId String?
+}
+
 model artwork {
   id          String       @id
   title       String
   description String
   price       Float
-  imageUrls   String[]
+  images      image[]
   dimensions  String // format: "length x width x height"
   weight      Float?
   condition   ArtCondition
@@ -98,7 +108,7 @@ model scheduledUpload {
   title       String
   description String
   price       Float
-  imageUrls   String[]
+  images      image[]
   dimensions  String
   weight      Float?
   condition   ArtCondition

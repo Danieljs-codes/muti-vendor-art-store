@@ -32,7 +32,6 @@ export type artwork = {
     title: string;
     description: string;
     price: number;
-    imageUrls: string[];
     dimensions: string;
     weight: number | null;
     condition: ArtCondition;
@@ -74,6 +73,13 @@ export type discount = {
     createdAt: Timestamp;
     updatedAt: Timestamp;
 };
+export type image = {
+    id: string;
+    url: string;
+    blurhash: string;
+    artworkId: string | null;
+    scheduledUploadId: string | null;
+};
 export type order = {
     id: string;
     userId: string;
@@ -108,7 +114,6 @@ export type scheduledUpload = {
     title: string;
     description: string;
     price: number;
-    imageUrls: string[];
     dimensions: string;
     weight: number | null;
     condition: ArtCondition;
@@ -159,6 +164,7 @@ export type DB = {
     artwork: artwork;
     cart: cart;
     discount: discount;
+    image: image;
     order: order;
     orderItem: orderItem;
     review: review;

@@ -3,6 +3,8 @@ import { convertToObject } from "@/utils/misc";
 import { type ParseRoute, redirect } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/start";
 import { deleteCookie, getCookie, setCookie } from "vinxi/http";
+import Sharp from "sharp";
+import { encode } from "blurhash";
 
 type Toast = {
 	intent: "success" | "error" | "info" | "warning";
@@ -41,4 +43,38 @@ export const setCookieAndRedirect = createServerFn({ method: "GET" })
 		setCookie("toast", JSON.stringify(ctx.data));
 
 		throw redirect({ to: ctx.data.redirectTo });
+	});
+
+export const generateBlurhash = createServerFn()
+	.validator((input: { imageBufferOrUrl: string | Buffer }) => input)
+	.handler(async (ctx) => {
+		try {
+			const { imageBufferOrUrl } = ctx.data;
+			const imageBuffer = Buffer.isBuffer(imageBufferOrUrl)
+				? imageBufferOrUrl
+				: await fetch(imageBufferOrUrl)
+						.then((res) => res.arrayBuffer())
+						.then(Buffer.from);
+
+			// Using 32x32 for good balance of speed and quality
+			// ComponentX: 4, ComponentY: 3 for good detail without excessive length
+			const { data: pixels, info: metadata } = await Sharp(imageBuffer)
+				.raw()
+				.ensureAlpha()
+				.resize(32, 32, { fit: "inside" })
+				.toBuffer({ resolveWithObject: true });
+
+			const blurhash = encode(
+				new Uint8ClampedArray(pixels),
+				metadata.width,
+				metadata.height,
+				4, // componentX: good horizontal detail
+				3, // componentY: slightly less vertical detail (common in art)
+			);
+
+			return blurhash;
+		} catch (error) {
+			console.error("Error generating blurhash:", error);
+			throw new Error("Failed to generate blurhash");
+		}
 	});

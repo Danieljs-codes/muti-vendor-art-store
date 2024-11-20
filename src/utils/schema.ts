@@ -139,4 +139,8 @@ export const createArtworkFormSchema = z.object({
 		)
 		.transform((val) => (val ? Number(val) : null))
 		.default(null),
+	images: z
+		.array(z.instanceof(File))
+		.min(2, { message: "At least 2 images are required" })
+		.max(4, { message: "Maximum of 4 images allowed" }),
 });

@@ -1,5 +1,8 @@
 import { PAYSTACK_PERCENTAGE_CHARGE } from "@/utils/const";
-import { createArtistProfileSchema } from "@/utils/schema";
+import {
+	createArtistProfileSchema,
+	createArtworkFormSchema,
+} from "@/utils/schema";
 import { paystack } from "@server/paystack";
 import { createServerFn } from "@tanstack/start";
 import { db } from "./database";
@@ -10,6 +13,7 @@ import {
 import { setCookieAndRedirect } from "./utils";
 import { z } from "zod";
 import { omit } from "@/utils/misc";
+import { utapi } from "./uploadthing";
 
 const validateBankSchema = createArtistProfileSchema.pick({
 	bankCode: true,
@@ -115,6 +119,7 @@ export const getArtistPendingOrders$ = createServerFn()
 			.selectFrom("order")
 			.innerJoin("orderItem", "orderItem.orderId", "order.id")
 			.innerJoin("artwork", "artwork.id", "orderItem.artworkId")
+			.innerJoin("image", "image.artworkId", "artwork.id")
 			.where("artwork.artistId", "=", artist.id)
 			.select([
 				"order.id",
@@ -125,7 +130,8 @@ export const getArtistPendingOrders$ = createServerFn()
 				"orderItem.finalPrice",
 				"orderItem.platformFee",
 				"artwork.title",
-				"artwork.imageUrls",
+				"image.url",
+				"image.blurhash",
 			])
 			.execute();
 
@@ -207,6 +213,7 @@ export const getArtistRecentSales$ = createServerFn()
 			.innerJoin("orderItem", "orderItem.orderId", "order.id")
 			.innerJoin("artwork", "artwork.id", "orderItem.artworkId")
 			.innerJoin("user", "user.id", "order.userId")
+			.innerJoin("image", "image.artworkId", "artwork.id")
 			.where("artwork.artistId", "=", artist.id)
 			.select([
 				"order.id",
@@ -217,7 +224,8 @@ export const getArtistRecentSales$ = createServerFn()
 				"orderItem.finalPrice",
 				"orderItem.platformFee",
 				"artwork.title",
-				"artwork.imageUrls",
+				"image.url",
+				"image.blurhash",
 				"user.name as customerName",
 				"user.email as customerEmail",
 			])
@@ -282,4 +290,30 @@ export const getArtistArtworks$ = createServerFn()
 				},
 			},
 		};
+	});
+
+// TODO: Generate the blurhash for the images also
+export const createArtistArtwork = createServerFn()
+	.middleware([validateArtistMiddleware])
+	.validator((data) => {
+		if (!(data instanceof FormData)) {
+			throw new Error("Invalid form data");
+		}
+		const formData = Object.fromEntries(data.entries());
+		const validatedData = createArtworkFormSchema.parse({
+			...formData,
+			images: data.getAll("images"),
+		});
+
+		return {
+			...validatedData,
+		};
+	})
+	.handler(async ({ data, context }) => {
+		const { artist } = context;
+
+		// Upload the images to uploadthing
+		const response = await utapi.uploadFiles(data.images);
+
+		// Create the artwork
 	});
