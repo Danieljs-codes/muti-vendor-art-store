@@ -87,9 +87,6 @@ const artworkBaseSchema = z.object({
 			required_error: "Price is required",
 		})
 		.positive({ message: "Price must be greater than 0" }),
-	imageUrls: z
-		.array(z.string().url({ message: "Invalid image URL" }))
-		.min(1, { message: "At least one image is required" }),
 	dimensions: z
 		.string()
 		.regex(/^\d+(\.\d+)?\s*x\s*\d+(\.\d+)?\s*x\s*\d+(\.\d+)?$/, {

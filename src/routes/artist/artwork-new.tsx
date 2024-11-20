@@ -9,11 +9,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { IconX } from "justd-icons";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { toast } from "sonner";
 import {
 	Button,
 	Card,
 	Checkbox,
 	Description,
+	FieldError,
 	FileTrigger,
 	Label,
 	NumberField,
@@ -57,12 +59,6 @@ function RouteComponent() {
 	const onSubmit = (data: z.infer<typeof createArtworkSchema>) => {
 		console.log(data);
 	};
-
-	const images = watch("images");
-
-	useEffect(() => {
-		console.log(images);
-	}, [images]);
 
 	return (
 		<div>
@@ -291,6 +287,7 @@ function RouteComponent() {
 										<Description className="block mb-3 text-xs mt-1">
 											Minimum of 3 images and maximum of 4
 										</Description>
+										<Description className="text-danger">Ola</Description>
 										{value && value.length > 0 && (
 											<div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
 												{Array.from(value).map((file, index) => (
