@@ -21,7 +21,8 @@
 		"rules": {
 			"recommended": true,
 			"complexity": {
-				"noUselessFragments": "off"
+				"noUselessFragments": "off",
+				"noForEach": "off"
 			},
 			"a11y": {
 				"noSvgWithoutTitle": "off"

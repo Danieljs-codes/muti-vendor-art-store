@@ -72,3 +72,7 @@ export const camelCaseToTitleCase = (str: string) => {
 		.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
 		.join(" ");
 };
+
+export const convertNairaToKobo = (amount: number) => {
+	return amount * 100;
+};

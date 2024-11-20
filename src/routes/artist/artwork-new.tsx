@@ -5,23 +5,28 @@ import {
 } from "@/utils/misc";
 import { createArtworkSchema } from "@/utils/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { createArtistArtwork$ } from "@server/artist";
+import { getArtistArtworkQueryOptions } from "@server/query-options";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/start";
 import { IconX } from "justd-icons";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import {
 	Button,
 	Card,
 	Checkbox,
+	cn,
 	Description,
-	FieldError,
 	FileTrigger,
 	Label,
 	NumberField,
 	Select,
 	Textarea,
 	TextField,
+	Loader,
 } from "ui";
 import type { z } from "zod";
 
@@ -32,6 +37,9 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
+	const queryClient = useQueryClient();
+	const navigate = Route.useNavigate();
+	const createArtistArtwork = useServerFn(createArtistArtwork$);
 	const [previousStock, setPreviousStock] = useState<number | null>(null);
 	const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([]);
 	const {
@@ -56,8 +64,40 @@ function RouteComponent() {
 		},
 	});
 
+	const { mutate, isPending } = useMutation({
+		mutationKey: ["create-artwork"],
+		mutationFn: async (data: z.infer<typeof createArtworkSchema>) => {
+			const formData = new FormData();
+			Object.entries(data).forEach(([key, value]) => {
+				if (key === "images" && Array.isArray(value)) {
+					value.forEach((file) => formData.append("images", file));
+				} else {
+					formData.append(key, value as string | Blob);
+				}
+			});
+			const res = await createArtistArtwork({
+				// @ts-expect-error
+				data: formData,
+			});
+			return res.data.artwork;
+		},
+
+		onSuccess: async () => {
+			await queryClient.invalidateQueries({
+				queryKey: getArtistArtworkQueryOptions({
+					page: 1,
+					limit: 10,
+				}).queryKey,
+			});
+			toast.success("Artwork created successfully");
+			navigate({
+				to: "/dashboard/artworks",
+			});
+		},
+	});
+
 	const onSubmit = (data: z.infer<typeof createArtworkSchema>) => {
-		console.log(data);
+		mutate(data);
 	};
 
 	return (
@@ -284,10 +324,14 @@ function RouteComponent() {
 										>
 											Upload Artworks
 										</FileTrigger>
-										<Description className="block mb-3 text-xs mt-1">
-											Minimum of 3 images and maximum of 4
+										<Description
+											className={cn(
+												"block mb-3 text-xs mt-1",
+												errors.images && "text-danger",
+											)}
+										>
+											{errors.images?.message || "Upload at least 2 images"}
 										</Description>
-										<Description className="text-danger">Ola</Description>
 										{value && value.length > 0 && (
 											<div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
 												{Array.from(value).map((file, index) => (
@@ -326,7 +370,10 @@ function RouteComponent() {
 							/>
 						</div>
 						<div className="flex justify-end mt-6">
-							<Button type="submit">Submit</Button>
+							<Button type="submit" isPending={isPending}>
+								{isPending && <Loader variant="spin" />}
+								{isPending ? "Creating..." : "Create Artwork"}
+							</Button>
 						</div>
 					</form>
 				</Card.Content>

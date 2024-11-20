@@ -12,7 +12,7 @@ import {
 } from "./middlewares/artist";
 import { generateBlurhash, setCookieAndRedirect } from "./utils";
 import { z } from "zod";
-import { omit } from "@/utils/misc";
+import { convertNairaToKobo, omit } from "@/utils/misc";
 import { utapi } from "./uploadthing";
 
 const validateBankSchema = createArtistProfileSchema.pick({
@@ -283,7 +283,10 @@ export const getArtistArtworks$ = createServerFn()
 		return {
 			success: true as const,
 			data: {
-				artworks: artworks.map((artwork) => omit(artwork, ["updatedAt"])),
+				artworks: artworks.map((artwork) => ({
+					...omit(artwork, ["updatedAt"]),
+					createdAt: new Date(artwork.createdAt).toISOString(),
+				})),
 				pagination: {
 					currentPage: page,
 					totalPages: Math.ceil(totalCount / limit),
@@ -293,8 +296,9 @@ export const getArtistArtworks$ = createServerFn()
 		};
 	});
 
-// TODO: Generate the blurhash for the images also
-export const createArtistArtwork = createServerFn()
+export const createArtistArtwork$ = createServerFn({
+	method: "POST",
+})
 	.middleware([validateArtistMiddleware])
 	.validator((data) => {
 		if (!(data instanceof FormData)) {
@@ -322,11 +326,13 @@ export const createArtistArtwork = createServerFn()
 	})
 	.handler(async ({ data, context }) => {
 		const { artist } = context;
+		console.log(data);
 
 		// Upload the images to uploadthing
 		const response = await utapi.uploadFiles(data.images);
 
 		// Process each uploaded image
+		const start = performance.now();
 		const processedImages = await Promise.all(
 			response.map(async (file) => {
 				if (file.error) {
@@ -342,6 +348,8 @@ export const createArtistArtwork = createServerFn()
 				};
 			}),
 		);
+		const end = performance.now();
+		console.log(`Time taken to process images: ${end - start}ms`);
 
 		// Create the artwork
 		const artwork = await db
@@ -350,7 +358,7 @@ export const createArtistArtwork = createServerFn()
 				id: crypto.randomUUID(),
 				title: data.title,
 				description: data.description,
-				price: data.price,
+				price: convertNairaToKobo(data.price),
 				dimensions: data.dimensions,
 				weight: data.weight,
 				condition: data.condition,
@@ -379,7 +387,7 @@ export const createArtistArtwork = createServerFn()
 		return {
 			success: true as const,
 			data: {
-				artwork,
+				artwork: omit(artwork, ["createdAt", "updatedAt"]),
 			},
 		};
 	});

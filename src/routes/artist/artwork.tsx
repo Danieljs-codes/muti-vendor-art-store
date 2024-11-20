@@ -1,21 +1,23 @@
 import { Icons } from "@/components/icons";
+import { formatCurrency } from "@/utils/misc";
 import { useDebouncedValue } from "@/utils/use-debounced-value";
 import { useSuspenseQueryDeferred } from "@/utils/use-suspense-query-deferred";
 import { getArtistArtworks$ } from "@server/artist";
+import type { ArtCondition } from "@server/enums";
 import { getArtistArtworkQueryOptions } from "@server/query-options";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/start";
 import { fallback, zodValidator } from "@tanstack/zod-adapter";
 import { useEffect, useState } from "react";
 import {
 	Badge,
 	Button,
-	buttonStyles,
 	Card,
 	Description,
 	Heading,
 	SearchField,
 	Table,
+	buttonStyles,
 } from "ui";
 import { z } from "zod";
 
@@ -95,17 +97,19 @@ const testData = {
 	total: 4,
 };
 
-const getBadgeConditionIntent = (condition: string) => {
-	switch (condition.toLowerCase()) {
-		case "new":
+const getBadgeConditionIntent = (
+	condition: ArtCondition,
+): "success" | "info" | "primary" | "warning" | "danger" | "secondary" => {
+	switch (condition) {
+		case "MINT":
 			return "success";
-		case "like new":
+		case "EXCELLENT":
 			return "info";
-		case "good":
+		case "GOOD":
 			return "primary";
-		case "fair":
+		case "FAIR":
 			return "warning";
-		case "poor":
+		case "POOR":
 			return "danger";
 		default:
 			return "secondary";
@@ -188,7 +192,7 @@ function RouteComponent() {
 								<Table.Column>Actions</Table.Column>
 							</Table.Header>
 							<Table.Body
-								items={testData.artworks}
+								items={artworks.artworks}
 								renderEmptyState={() => (
 									<div className="flex flex-col items-center justify-center p-4">
 										<p className="text-fg text-base mb-1 font-semibold">
@@ -216,14 +220,21 @@ function RouteComponent() {
 									<Table.Row id={items.id}>
 										<Table.Cell>{items.id}</Table.Cell>
 										<Table.Cell>{items.title}</Table.Cell>
-										<Table.Cell>{items.price}</Table.Cell>
-										<Table.Cell>{items.category}</Table.Cell>
+										<Table.Cell>
+											{formatCurrency({ amount: items.price, isKobo: true })}
+										</Table.Cell>
+										<Table.Cell className="capitalize">
+											{items.category.toLowerCase()}
+										</Table.Cell>
 										<Table.Cell>{items.dimensions}</Table.Cell>
 										<Table.Cell>{items.weight}</Table.Cell>
 										<Table.Cell>{items.stock}</Table.Cell>
 										<Table.Cell>
-											<Badge intent={getBadgeConditionIntent(items.condition)}>
-												{items.condition}
+											<Badge
+												intent={getBadgeConditionIntent(items.condition)}
+												className="capitalize"
+											>
+												{items.condition.toLowerCase()}
 											</Badge>
 										</Table.Cell>
 										<Table.Cell>

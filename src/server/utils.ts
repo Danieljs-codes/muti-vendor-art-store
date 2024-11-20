@@ -56,20 +56,20 @@ export const generateBlurhash = createServerFn()
 						.then((res) => res.arrayBuffer())
 						.then(Buffer.from);
 
-			// Using 32x32 for good balance of speed and quality
-			// ComponentX: 4, ComponentY: 3 for good detail without excessive length
+			// Using 64x64 for higher quality, balancing detail and performance
+			// ComponentX: 6, ComponentY: 5 for increased detail in both dimensions
 			const { data: pixels, info: metadata } = await Sharp(imageBuffer)
 				.raw()
 				.ensureAlpha()
-				.resize(32, 32, { fit: "inside" })
+				.resize(64, 64, { fit: "inside" })
 				.toBuffer({ resolveWithObject: true });
 
 			const blurhash = encode(
 				new Uint8ClampedArray(pixels),
 				metadata.width,
 				metadata.height,
-				4, // componentX: good horizontal detail
-				3, // componentY: slightly less vertical detail (common in art)
+				6, // componentX: increased horizontal detail
+				5, // componentY: increased vertical detail for better quality
 			);
 
 			return blurhash;

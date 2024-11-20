@@ -96,7 +96,9 @@ const artworkBaseSchema = z.object({
 	condition: z.enum(ARTWORK_CONDITIONS),
 	category: z.enum(ARTWORK_CATEGORIES),
 	images: z
-		.array(z.instanceof(File))
+		.array(z.instanceof(File), {
+			required_error: "At least 2 images are required",
+		})
 		.min(2, { message: "At least 2 images are required" })
 		.max(4, { message: "Maximum of 4 images allowed" }),
 });
