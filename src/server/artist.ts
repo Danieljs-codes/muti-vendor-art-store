@@ -437,6 +437,7 @@ export const getArtworkById$ = createServerFn()
 				"artwork.title",
 				"artwork.description",
 				"artwork.price",
+				"artwork.views",
 				"artwork.dimensions",
 				"artwork.weight",
 				"artwork.condition",
