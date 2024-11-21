@@ -21,6 +21,7 @@ const routes = rootRoute("root.tsx", [
 			index("artist/artwork.tsx"),
 			route("$id", "artist/artwork-details.tsx"),
 		]),
+		route("dashboard/orders", "artist/artist-orders.tsx"),
 		route("dashboard/artworks-new", "artist/artwork-new.tsx"),
 	]),
 ]);

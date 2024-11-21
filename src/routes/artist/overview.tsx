@@ -16,7 +16,6 @@ import { Suspense } from "react";
 import { Card, DateRangePicker, Heading, Loader } from "ui";
 import { z } from "zod";
 
-
 const overviewSearchParam = z.object({
 	startDate: fallback(
 		z.string().regex(/^\d{4}-\d{2}-\d{2}$/),

@@ -19,6 +19,7 @@ import { Route as authSignUpImport } from './routes/auth/sign-up'
 import { Route as authSignInImport } from './routes/auth/sign-in'
 import { Route as indexImport } from './routes/index'
 import { Route as artistOverviewImport } from './routes/artist/overview'
+import { Route as artistArtistOrdersImport } from './routes/artist/artist-orders'
 import { Route as artistArtworkNewImport } from './routes/artist/artwork-new'
 import { Route as artistArtworkLayoutImport } from './routes/artist/artwork-layout'
 import { Route as artistArtworkDetailsImport } from './routes/artist/artwork-details'
@@ -68,6 +69,12 @@ const indexRoute = indexImport.update({
 const artistOverviewRoute = artistOverviewImport.update({
   id: '/dashboard/overview',
   path: '/dashboard/overview',
+  getParentRoute: () => artistLayoutRoute,
+} as any)
+
+const artistArtistOrdersRoute = artistArtistOrdersImport.update({
+  id: '/dashboard/orders',
+  path: '/dashboard/orders',
   getParentRoute: () => artistLayoutRoute,
 } as any)
 
@@ -162,6 +169,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof artistArtworkNewImport
       parentRoute: typeof artistLayoutImport
     }
+    '/_dashboard-layout-id/dashboard/orders': {
+      id: '/_dashboard-layout-id/dashboard/orders'
+      path: '/dashboard/orders'
+      fullPath: '/dashboard/orders'
+      preLoaderRoute: typeof artistArtistOrdersImport
+      parentRoute: typeof artistLayoutImport
+    }
     '/_dashboard-layout-id/dashboard/overview': {
       id: '/_dashboard-layout-id/dashboard/overview'
       path: '/dashboard/overview'
@@ -218,12 +232,14 @@ const artistArtworkLayoutRouteWithChildren =
 interface artistLayoutRouteChildren {
   artistArtworkLayoutRoute: typeof artistArtworkLayoutRouteWithChildren
   artistArtworkNewRoute: typeof artistArtworkNewRoute
+  artistArtistOrdersRoute: typeof artistArtistOrdersRoute
   artistOverviewRoute: typeof artistOverviewRoute
 }
 
 const artistLayoutRouteChildren: artistLayoutRouteChildren = {
   artistArtworkLayoutRoute: artistArtworkLayoutRouteWithChildren,
   artistArtworkNewRoute: artistArtworkNewRoute,
+  artistArtistOrdersRoute: artistArtistOrdersRoute,
   artistOverviewRoute: artistOverviewRoute,
 }
 
@@ -250,6 +266,7 @@ export interface FileRoutesByFullPath {
   '/sign-up': typeof authSignUpRoute
   '/dashboard/artworks': typeof artistArtworkLayoutRouteWithChildren
   '/dashboard/artworks-new': typeof artistArtworkNewRoute
+  '/dashboard/orders': typeof artistArtistOrdersRoute
   '/dashboard/overview': typeof artistOverviewRoute
   '/dashboard/artworks/': typeof artistArtworkRoute
   '/dashboard/artworks/$id': typeof artistArtworkDetailsRoute
@@ -262,6 +279,7 @@ export interface FileRoutesByTo {
   '/sign-in': typeof authSignInRoute
   '/sign-up': typeof authSignUpRoute
   '/dashboard/artworks-new': typeof artistArtworkNewRoute
+  '/dashboard/orders': typeof artistArtistOrdersRoute
   '/dashboard/overview': typeof artistOverviewRoute
   '/dashboard/artworks': typeof artistArtworkRoute
   '/dashboard/artworks/$id': typeof artistArtworkDetailsRoute
@@ -278,6 +296,7 @@ export interface FileRoutesById {
   '/_auth-layout-id/sign-up': typeof authSignUpRoute
   '/_dashboard-layout-id/dashboard/artworks': typeof artistArtworkLayoutRouteWithChildren
   '/_dashboard-layout-id/dashboard/artworks-new': typeof artistArtworkNewRoute
+  '/_dashboard-layout-id/dashboard/orders': typeof artistArtistOrdersRoute
   '/_dashboard-layout-id/dashboard/overview': typeof artistOverviewRoute
   '/_dashboard-layout-id/dashboard/artworks/': typeof artistArtworkRoute
   '/_dashboard-layout-id/dashboard/artworks/$id': typeof artistArtworkDetailsRoute
@@ -293,6 +312,7 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/dashboard/artworks'
     | '/dashboard/artworks-new'
+    | '/dashboard/orders'
     | '/dashboard/overview'
     | '/dashboard/artworks/'
     | '/dashboard/artworks/$id'
@@ -304,6 +324,7 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/dashboard/artworks-new'
+    | '/dashboard/orders'
     | '/dashboard/overview'
     | '/dashboard/artworks'
     | '/dashboard/artworks/$id'
@@ -318,6 +339,7 @@ export interface FileRouteTypes {
     | '/_auth-layout-id/sign-up'
     | '/_dashboard-layout-id/dashboard/artworks'
     | '/_dashboard-layout-id/dashboard/artworks-new'
+    | '/_dashboard-layout-id/dashboard/orders'
     | '/_dashboard-layout-id/dashboard/overview'
     | '/_dashboard-layout-id/dashboard/artworks/'
     | '/_dashboard-layout-id/dashboard/artworks/$id'
@@ -366,6 +388,7 @@ export const routeTree = rootRoute
       "children": [
         "/_dashboard-layout-id/dashboard/artworks",
         "/_dashboard-layout-id/dashboard/artworks-new",
+        "/_dashboard-layout-id/dashboard/orders",
         "/_dashboard-layout-id/dashboard/overview"
       ]
     },
@@ -400,6 +423,10 @@ export const routeTree = rootRoute
     },
     "/_dashboard-layout-id/dashboard/artworks-new": {
       "filePath": "artist/artwork-new.tsx",
+      "parent": "/_dashboard-layout-id"
+    },
+    "/_dashboard-layout-id/dashboard/orders": {
+      "filePath": "artist/artist-orders.tsx",
       "parent": "/_dashboard-layout-id"
     },
     "/_dashboard-layout-id/dashboard/overview": {

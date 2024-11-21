@@ -1,21 +1,21 @@
 import { PAYSTACK_PERCENTAGE_CHARGE } from "@/utils/const";
+import { convertNairaToKobo, omit } from "@/utils/misc";
 import {
 	createArtistProfileSchema,
 	createArtworkFormSchema,
 } from "@/utils/schema";
 import { paystack } from "@server/paystack";
+import { notFound } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/start";
+import { sql } from "kysely";
+import { z } from "zod";
 import { db } from "./database";
 import {
 	maybeArtistMiddleware,
 	validateArtistMiddleware,
 } from "./middlewares/artist";
-import { generateBlurhash, setCookieAndRedirect } from "./utils";
-import { z } from "zod";
-import { convertNairaToKobo, omit } from "@/utils/misc";
 import { utapi } from "./uploadthing";
-import { sql } from "kysely";
-import { notFound } from "@tanstack/react-router";
+import { generateBlurhash, setCookieAndRedirect } from "./utils";
 
 const validateBankSchema = createArtistProfileSchema.pick({
 	bankCode: true,
@@ -473,6 +473,47 @@ export const getArtworkById$ = createServerFn()
 					...artwork,
 					createdAt: new Date(artwork.createdAt).toISOString(),
 				},
+			},
+		};
+	});
+
+// TODO: Add filter for searching by Order ID
+export const getArtistOrders$ = createServerFn()
+	.middleware([validateArtistMiddleware])
+	.handler(async ({ context }) => {
+		const { artist } = context;
+
+		// Get all artist orders
+		const orders = await db
+			.selectFrom("order")
+			.innerJoin("orderItem", "orderItem.orderId", "order.id")
+			.innerJoin("artwork", "artwork.id", "orderItem.artworkId")
+			.innerJoin("user", "user.id", "order.userId")
+			.where("artwork.artistId", "=", artist.id)
+			.select([
+				"order.id",
+				"order.totalPrice",
+				"order.shippingStatus",
+				"orderItem.quantity",
+				"orderItem.price",
+				"orderItem.finalPrice",
+				"orderItem.platformFee",
+				"orderItem.createdAt",
+				"artwork.title",
+				"artwork.description",
+				"user.name as customerName",
+				"user.email as customerEmail",
+			])
+			.orderBy("orderItem.createdAt", "desc")
+			.execute();
+
+		return {
+			success: true as const,
+			data: {
+				orders: orders.map((order) => ({
+					...order,
+					createdAt: new Date(order.createdAt).toISOString(),
+				})),
 			},
 		};
 	});

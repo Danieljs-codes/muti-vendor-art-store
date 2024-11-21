@@ -193,7 +193,7 @@ function RouteComponent() {
 								<dt className="text-sm font-medium text-gray-500">Views:</dt>
 								<dd className="font-medium">{artwork.views} views</dd>
 								<dt className="text-sm font-medium text-gray-500">
-									Uploaded Ar:
+									Uploaded At:
 								</dt>
 								<dd className="font-medium">
 									{new Date(artwork.createdAt).toLocaleDateString("en-NG", {

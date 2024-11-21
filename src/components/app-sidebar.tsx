@@ -71,7 +71,7 @@ export function AppSidebar({
 					</Sidebar.Item>
 					<Sidebar.Item
 						icon={Icons.Orders}
-						href="/"
+						href="/dashboard/orders"
 						isCurrent={pathname.includes("orders")}
 						badge={String(pendingOrders)}
 					>
