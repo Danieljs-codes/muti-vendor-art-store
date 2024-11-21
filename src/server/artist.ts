@@ -10,6 +10,7 @@ import { createServerFn } from "@tanstack/start";
 import { sql } from "kysely";
 import { z } from "zod";
 import { db } from "./database";
+import { ShippingStatus } from "./enums";
 import {
 	maybeArtistMiddleware,
 	validateArtistMiddleware,
@@ -514,6 +515,67 @@ export const getArtistOrders$ = createServerFn()
 					...order,
 					createdAt: new Date(order.createdAt).toISOString(),
 				})),
+			},
+		};
+	});
+
+const updateOrderShippingStatusSchema = z.object({
+	orderId: z.string(),
+	status: z.enum([ShippingStatus.SHIPPED, ShippingStatus.DELIVERED]),
+});
+
+export const updateOrderShippingStatus$ = createServerFn()
+	.middleware([validateArtistMiddleware])
+	.validator(updateOrderShippingStatusSchema)
+	.handler(async ({ context, data }) => {
+		const { artist } = context;
+		const { orderId, status } = data;
+
+		// Verify the order belongs to the artist
+		const order = await db
+			.selectFrom("order")
+			.innerJoin("orderItem", "orderItem.orderId", "order.id")
+			.innerJoin("artwork", "artwork.id", "orderItem.artworkId")
+			.where("artwork.artistId", "=", artist.id)
+			.where("order.id", "=", orderId)
+			.select("order.shippingStatus")
+			.executeTakeFirst();
+
+		if (!order) {
+			return {
+				success: false as const,
+				message: "Order not found",
+			};
+		}
+
+		// Validate status transition
+		if (
+			order.shippingStatus === ShippingStatus.DELIVERED ||
+			(status === ShippingStatus.DELIVERED &&
+				order.shippingStatus !== ShippingStatus.SHIPPED)
+		) {
+			return {
+				success: false as const,
+				message: "Invalid status transition",
+			};
+		}
+
+		// Update order shipping status
+		await db
+			.updateTable("order")
+			.set({
+				shippingStatus: status,
+				updatedAt: new Date(),
+			})
+			.where("id", "=", orderId)
+			.execute();
+
+		return {
+			success: true as const,
+			message: `Order marked as ${status.toLowerCase()}`,
+			data: {
+				orderId,
+				status,
 			},
 		};
 	});

@@ -1,9 +1,14 @@
 import { Icons } from "@/components/icons";
-import { getArtistOrders$ } from "@server/artist";
+import { useSuspenseQueryDeferred } from "@/utils/use-suspense-query-deferred";
+import { getArtistOrders$, updateOrderShippingStatus$ } from "@server/artist";
+import { ShippingStatus } from "@server/enums";
 import { getArtistOrdersQueryOptions } from "@server/query-options";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/start";
 import { IconDotsVertical } from "justd-icons";
+import Balancer from "react-wrap-balancer";
+import { toast } from "sonner";
 import { Badge, Card, Description, Heading, Menu, Table } from "ui";
 
 // Test data with additional fields matching the API response
@@ -61,21 +66,46 @@ export const Route = createFileRoute("/_dashboard-layout-id/dashboard/orders")({
 
 function RouteComponent() {
 	const getArtistOrders = useServerFn(getArtistOrders$);
-	// Temporarily comment out the real data fetch and use mock data
-	// const {
-	// 	data: { orders },
-	// } = useSuspenseQueryDeferred({
-	// 	...getArtistOrdersQueryOptions(),
-	// 	queryFn: async () => {
-	// 		const res = await getArtistOrders()
-	// 		return res
-	// 	},
-	// })
+	const updateShippingStatus = useServerFn(updateOrderShippingStatus$);
+	const queryClient = useQueryClient();
 
-	// Use mock data instead
-	const orders = mockOrders;
+	const { mutate: updateStatus } = useMutation({
+		mutationFn: async ({
+			orderId,
+			status,
+		}: { orderId: string; status: "SHIPPED" | "DELIVERED" }) => {
+			const result = await updateShippingStatus({
+				data: {
+					orderId,
+					status,
+				},
+			});
 
-	function getStatusBadgeIntent(status: "PENDING" | "SHIPPED" | "DELIVERED") {
+			if (!result.success) throw new Error(result.message);
+			return result.data;
+		},
+		onSuccess: async (data) => {
+			toast.success(`Order marked as ${data.status.toLowerCase()}`);
+			await queryClient.invalidateQueries({
+				queryKey: getArtistOrdersQueryOptions().queryKey,
+			});
+		},
+		onError: (error) => {
+			toast.error(error.message);
+		},
+	});
+
+	const {
+		data: { orders },
+	} = useSuspenseQueryDeferred({
+		...getArtistOrdersQueryOptions(),
+		queryFn: async () => {
+			const res = await getArtistOrders();
+			return res;
+		},
+	});
+
+	function getStatusBadgeIntent(status: ShippingStatus) {
 		switch (status.toLowerCase()) {
 			case "delivered":
 				return "success";
@@ -86,33 +116,46 @@ function RouteComponent() {
 		}
 	}
 
-	function renderMenuContent(status: "PENDING" | "SHIPPED" | "DELIVERED") {
-		if (status === "DELIVERED") return null;
+	function handleUpdateStatus(
+		orderId: string,
+		status: "SHIPPED" | "DELIVERED",
+	) {
+		updateStatus({ orderId, status });
+	}
+
+	function renderMenuContent(orderId: string, status: ShippingStatus) {
+		if (status === ShippingStatus.DELIVERED) return null;
 
 		return (
 			<Menu.Content respectScreen={false} showArrow placement="left top">
-				{status === "PENDING" && (
+				{status === ShippingStatus.PENDING && (
 					<>
 						<Menu.Item
 							className="text-sm"
-							onAction={() => console.log("Mark as shipped")}
+							onAction={() =>
+								handleUpdateStatus(orderId, ShippingStatus.SHIPPED)
+							}
 						>
 							<Icons.ShippingTruck />
 							Mark as shipped
 						</Menu.Item>
 						<Menu.Item
 							className="text-sm"
-							onAction={() => console.log("Mark as delivered")}
+							onAction={() =>
+								handleUpdateStatus(orderId, ShippingStatus.DELIVERED)
+							}
 						>
 							<Icons.PackageDelivered />
 							Mark as delivered
 						</Menu.Item>
 					</>
 				)}
-				{status === "SHIPPED" && (
+				{status === ShippingStatus.SHIPPED && (
 					<Menu.Item
 						className="text-sm"
-						onAction={() => console.log("Mark as delivered")}
+						onAction={() =>
+							handleUpdateStatus(orderId, ShippingStatus.DELIVERED)
+						}
 					>
 						<Icons.PackageDelivered />
 						Mark as delivered
@@ -143,7 +186,22 @@ function RouteComponent() {
 							<Table.Column>Status</Table.Column>
 							<Table.Column />
 						</Table.Header>
-						<Table.Body items={orders}>
+						<Table.Body
+							items={orders}
+							renderEmptyState={() => (
+								<div className="flex flex-col items-center justify-center p-4">
+									<p className="text-fg text-base mb-1 font-semibold">
+										No orders found
+									</p>
+									<p className="text-muted-fg text-sm text-center">
+										<Balancer className="max-w-[350px]">
+											You don't have any orders yet. Orders will appear here
+											once customers purchase your artworks.
+										</Balancer>
+									</p>
+								</div>
+							)}
+						>
 							{(order) => (
 								<Table.Row key={order.id}>
 									<Table.Cell>{order.id}</Table.Cell>
@@ -185,7 +243,7 @@ function RouteComponent() {
 												<Menu.Trigger>
 													<IconDotsVertical />
 												</Menu.Trigger>
-												{renderMenuContent(order.shippingStatus)}
+												{renderMenuContent(order.id, order.shippingStatus)}
 											</Menu>
 										)}
 									</Table.Cell>
