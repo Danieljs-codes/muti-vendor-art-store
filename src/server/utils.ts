@@ -78,3 +78,7 @@ export const generateBlurhash = createServerFn()
 			throw new Error("Failed to generate blurhash");
 		}
 	});
+
+export const isNull = (value: unknown) => {
+	return value === null;
+};

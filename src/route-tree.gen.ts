@@ -20,6 +20,7 @@ import { Route as authSignInImport } from './routes/auth/sign-in'
 import { Route as indexImport } from './routes/index'
 import { Route as artistOverviewImport } from './routes/artist/overview'
 import { Route as artistArtworkNewImport } from './routes/artist/artwork-new'
+import { Route as artistArtworkLayoutImport } from './routes/artist/artwork-layout'
 import { Route as artistArtworkImport } from './routes/artist/artwork'
 
 // Create/Update Routes
@@ -75,10 +76,16 @@ const artistArtworkNewRoute = artistArtworkNewImport.update({
   getParentRoute: () => artistLayoutRoute,
 } as any)
 
-const artistArtworkRoute = artistArtworkImport.update({
+const artistArtworkLayoutRoute = artistArtworkLayoutImport.update({
   id: '/dashboard/artworks',
   path: '/dashboard/artworks',
   getParentRoute: () => artistLayoutRoute,
+} as any)
+
+const artistArtworkRoute = artistArtworkImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => artistArtworkLayoutRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
@@ -138,7 +145,7 @@ declare module '@tanstack/react-router' {
       id: '/_dashboard-layout-id/dashboard/artworks'
       path: '/dashboard/artworks'
       fullPath: '/dashboard/artworks'
-      preLoaderRoute: typeof artistArtworkImport
+      preLoaderRoute: typeof artistArtworkLayoutImport
       parentRoute: typeof artistLayoutImport
     }
     '/_dashboard-layout-id/dashboard/artworks-new': {
@@ -154,6 +161,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/overview'
       preLoaderRoute: typeof artistOverviewImport
       parentRoute: typeof artistLayoutImport
+    }
+    '/_dashboard-layout-id/dashboard/artworks/': {
+      id: '/_dashboard-layout-id/dashboard/artworks/'
+      path: '/'
+      fullPath: '/dashboard/artworks/'
+      preLoaderRoute: typeof artistArtworkImport
+      parentRoute: typeof artistArtworkLayoutImport
     }
   }
 }
@@ -174,14 +188,25 @@ const authLayoutRouteWithChildren = authLayoutRoute._addFileChildren(
   authLayoutRouteChildren,
 )
 
-interface artistLayoutRouteChildren {
+interface artistArtworkLayoutRouteChildren {
   artistArtworkRoute: typeof artistArtworkRoute
+}
+
+const artistArtworkLayoutRouteChildren: artistArtworkLayoutRouteChildren = {
+  artistArtworkRoute: artistArtworkRoute,
+}
+
+const artistArtworkLayoutRouteWithChildren =
+  artistArtworkLayoutRoute._addFileChildren(artistArtworkLayoutRouteChildren)
+
+interface artistLayoutRouteChildren {
+  artistArtworkLayoutRoute: typeof artistArtworkLayoutRouteWithChildren
   artistArtworkNewRoute: typeof artistArtworkNewRoute
   artistOverviewRoute: typeof artistOverviewRoute
 }
 
 const artistLayoutRouteChildren: artistLayoutRouteChildren = {
-  artistArtworkRoute: artistArtworkRoute,
+  artistArtworkLayoutRoute: artistArtworkLayoutRouteWithChildren,
   artistArtworkNewRoute: artistArtworkNewRoute,
   artistOverviewRoute: artistOverviewRoute,
 }
@@ -207,9 +232,10 @@ export interface FileRoutesByFullPath {
   '/': typeof indexRoute
   '/sign-in': typeof authSignInRoute
   '/sign-up': typeof authSignUpRoute
-  '/dashboard/artworks': typeof artistArtworkRoute
+  '/dashboard/artworks': typeof artistArtworkLayoutRouteWithChildren
   '/dashboard/artworks-new': typeof artistArtworkNewRoute
   '/dashboard/overview': typeof artistOverviewRoute
+  '/dashboard/artworks/': typeof artistArtworkRoute
 }
 
 export interface FileRoutesByTo {
@@ -218,9 +244,9 @@ export interface FileRoutesByTo {
   '/': typeof indexRoute
   '/sign-in': typeof authSignInRoute
   '/sign-up': typeof authSignUpRoute
-  '/dashboard/artworks': typeof artistArtworkRoute
   '/dashboard/artworks-new': typeof artistArtworkNewRoute
   '/dashboard/overview': typeof artistOverviewRoute
+  '/dashboard/artworks': typeof artistArtworkRoute
 }
 
 export interface FileRoutesById {
@@ -232,9 +258,10 @@ export interface FileRoutesById {
   '/_main-layout-id/': typeof indexRoute
   '/_auth-layout-id/sign-in': typeof authSignInRoute
   '/_auth-layout-id/sign-up': typeof authSignUpRoute
-  '/_dashboard-layout-id/dashboard/artworks': typeof artistArtworkRoute
+  '/_dashboard-layout-id/dashboard/artworks': typeof artistArtworkLayoutRouteWithChildren
   '/_dashboard-layout-id/dashboard/artworks-new': typeof artistArtworkNewRoute
   '/_dashboard-layout-id/dashboard/overview': typeof artistOverviewRoute
+  '/_dashboard-layout-id/dashboard/artworks/': typeof artistArtworkRoute
 }
 
 export interface FileRouteTypes {
@@ -248,6 +275,7 @@ export interface FileRouteTypes {
     | '/dashboard/artworks'
     | '/dashboard/artworks-new'
     | '/dashboard/overview'
+    | '/dashboard/artworks/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | ''
@@ -255,9 +283,9 @@ export interface FileRouteTypes {
     | '/'
     | '/sign-in'
     | '/sign-up'
-    | '/dashboard/artworks'
     | '/dashboard/artworks-new'
     | '/dashboard/overview'
+    | '/dashboard/artworks'
   id:
     | '__root__'
     | '/_auth-layout-id'
@@ -270,6 +298,7 @@ export interface FileRouteTypes {
     | '/_dashboard-layout-id/dashboard/artworks'
     | '/_dashboard-layout-id/dashboard/artworks-new'
     | '/_dashboard-layout-id/dashboard/overview'
+    | '/_dashboard-layout-id/dashboard/artworks/'
   fileRoutesById: FileRoutesById
 }
 
@@ -340,8 +369,11 @@ export const routeTree = rootRoute
       "parent": "/_auth-layout-id"
     },
     "/_dashboard-layout-id/dashboard/artworks": {
-      "filePath": "artist/artwork.tsx",
-      "parent": "/_dashboard-layout-id"
+      "filePath": "artist/artwork-layout.tsx",
+      "parent": "/_dashboard-layout-id",
+      "children": [
+        "/_dashboard-layout-id/dashboard/artworks/"
+      ]
     },
     "/_dashboard-layout-id/dashboard/artworks-new": {
       "filePath": "artist/artwork-new.tsx",
@@ -350,6 +382,10 @@ export const routeTree = rootRoute
     "/_dashboard-layout-id/dashboard/overview": {
       "filePath": "artist/overview.tsx",
       "parent": "/_dashboard-layout-id"
+    },
+    "/_dashboard-layout-id/dashboard/artworks/": {
+      "filePath": "artist/artwork.tsx",
+      "parent": "/_dashboard-layout-id/dashboard/artworks"
     }
   }
 }

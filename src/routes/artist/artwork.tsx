@@ -5,6 +5,7 @@ import { useSuspenseQueryDeferred } from "@/utils/use-suspense-query-deferred";
 import { getArtistArtworks$ } from "@server/artist";
 import type { ArtCondition } from "@server/enums";
 import { getArtistArtworkQueryOptions } from "@server/query-options";
+import { isNull } from "@server/utils";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/start";
 import { fallback, zodValidator } from "@tanstack/zod-adapter";
@@ -20,6 +21,7 @@ import {
 	buttonStyles,
 } from "ui";
 import { z } from "zod";
+import { Blurhash } from "react-blurhash";
 
 const artworkSearchParam = z.object({
 	page: fallback(z.number().min(1), 1).default(1),
@@ -28,7 +30,7 @@ const artworkSearchParam = z.object({
 });
 
 export const Route = createFileRoute(
-	"/_dashboard-layout-id/dashboard/artworks",
+	"/_dashboard-layout-id/dashboard/artworks/",
 )({
 	validateSearch: zodValidator(artworkSearchParam),
 	loaderDeps: ({ search: { page, limit, search } }) => ({
@@ -180,7 +182,7 @@ function RouteComponent() {
 					<Card>
 						<Table aria-label="Artworks">
 							<Table.Header>
-								<Table.Column>Artwork ID</Table.Column>
+								<Table.Column>Preview</Table.Column>
 								<Table.Column isRowHeader>Artwork Name</Table.Column>
 								<Table.Column>Price</Table.Column>
 								<Table.Column>Category</Table.Column>
@@ -219,7 +221,13 @@ function RouteComponent() {
 							>
 								{(items) => (
 									<Table.Row id={items.id}>
-										<Table.Cell>{items.id}</Table.Cell>
+										<Table.Cell>
+											<img
+												src={items.imageUrls[0] as string}
+												alt={items.title}
+												className="size-10 rounded-md shrink-0 object-cover"
+											/>
+										</Table.Cell>
 										<Table.Cell>{items.title}</Table.Cell>
 										<Table.Cell>
 											{formatCurrency({ amount: items.price, isKobo: true })}
@@ -229,7 +237,13 @@ function RouteComponent() {
 										</Table.Cell>
 										<Table.Cell>{items.dimensions}</Table.Cell>
 										<Table.Cell>{items.weight}</Table.Cell>
-										<Table.Cell>{items.stock}</Table.Cell>
+										<Table.Cell>
+											{isNull(items.stock)
+												? "Unlimited"
+												: items.stock === 0
+													? "Sold Out"
+													: items.stock}
+										</Table.Cell>
 										<Table.Cell>
 											<Badge
 												intent={getBadgeConditionIntent(items.condition)}
@@ -246,8 +260,12 @@ function RouteComponent() {
 											})}
 										</Table.Cell>
 										<Table.Cell>
-											{/* Todo Add valid link to */}
-											<Link>View</Link>
+											<Link
+												to="/dashboard/artworks/$id"
+												params={{ id: items.id }}
+											>
+												View
+											</Link>
 										</Table.Cell>
 									</Table.Row>
 								)}

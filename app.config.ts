@@ -17,7 +17,10 @@ const routes = rootRoute("root.tsx", [
 	route("create-artist", "artist/create.tsx"),
 	layout("dashboard-layout-id", "artist/layout.tsx", [
 		route("dashboard/overview", "artist/overview.tsx"),
-		route("dashboard/artworks", "artist/artwork.tsx"),
+		route("dashboard/artworks", "artist/artwork-layout.tsx", [
+			index("artist/artwork.tsx"),
+			route("$id", "artist/artwork-details.tsx"),
+		]),
 		route("dashboard/artworks-new", "artist/artwork-new.tsx"),
 	]),
 ]);

@@ -14,6 +14,7 @@ import { generateBlurhash, setCookieAndRedirect } from "./utils";
 import { z } from "zod";
 import { convertNairaToKobo, omit } from "@/utils/misc";
 import { utapi } from "./uploadthing";
+import { sql } from "kysely";
 
 const validateBankSchema = createArtistProfileSchema.pick({
 	bankCode: true,
@@ -258,6 +259,7 @@ export const getArtistArtworks$ = createServerFn()
 		const [artworks, totalCount] = await Promise.all([
 			db
 				.selectFrom("artwork")
+				.leftJoin("image", "image.artworkId", "artwork.id")
 				.where("artwork.artistId", "=", artist.id)
 				.where((eb) =>
 					search
@@ -267,7 +269,32 @@ export const getArtistArtworks$ = createServerFn()
 							])
 						: eb.val(true),
 				)
-				.selectAll()
+				.select([
+					"artwork.id",
+					"artwork.title",
+					"artwork.description",
+					"artwork.price",
+					"artwork.dimensions",
+					"artwork.weight",
+					"artwork.condition",
+					"artwork.category",
+					"artwork.stock",
+					"artwork.createdAt",
+					db.fn.jsonAgg(sql.raw("image.url")).as("imageUrls"),
+					db.fn.jsonAgg(sql.raw("image.blurhash")).as("imageBlurhashes"),
+				])
+				.groupBy([
+					"artwork.id",
+					"artwork.title",
+					"artwork.description",
+					"artwork.price",
+					"artwork.dimensions",
+					"artwork.weight",
+					"artwork.condition",
+					"artwork.category",
+					"artwork.stock",
+					"artwork.createdAt",
+				])
 				.limit(limit)
 				.offset(offset)
 				.orderBy("artwork.createdAt", "desc")
@@ -284,7 +311,7 @@ export const getArtistArtworks$ = createServerFn()
 			success: true as const,
 			data: {
 				artworks: artworks.map((artwork) => ({
-					...omit(artwork, ["updatedAt"]),
+					...artwork,
 					createdAt: new Date(artwork.createdAt).toISOString(),
 				})),
 				pagination: {

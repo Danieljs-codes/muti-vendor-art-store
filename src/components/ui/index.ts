@@ -40,3 +40,4 @@ export * from './table';
 export * from './skeleton';
 export * from './number-field';
 export * from './file-trigger';
+export * from './carousel';
