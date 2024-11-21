@@ -15,6 +15,7 @@ import { z } from "zod";
 import { convertNairaToKobo, omit } from "@/utils/misc";
 import { utapi } from "./uploadthing";
 import { sql } from "kysely";
+import { notFound } from "@tanstack/react-router";
 
 const validateBankSchema = createArtistProfileSchema.pick({
 	bankCode: true,
@@ -415,6 +416,62 @@ export const createArtistArtwork$ = createServerFn({
 			success: true as const,
 			data: {
 				artwork: omit(artwork, ["createdAt", "updatedAt"]),
+			},
+		};
+	});
+
+export const getArtworkById$ = createServerFn()
+	.validator(z.object({ id: z.string() }))
+	.middleware([validateArtistMiddleware])
+	.handler(async ({ context, data }) => {
+		const { artist } = context;
+
+		// Get artwork by id
+		const artwork = await db
+			.selectFrom("artwork")
+			.leftJoin("image", "image.artworkId", "artwork.id")
+			.where("artwork.artistId", "=", artist.id)
+			.where("artwork.id", "=", data.id)
+			.select(({ fn }) => [
+				"artwork.id",
+				"artwork.title",
+				"artwork.description",
+				"artwork.price",
+				"artwork.dimensions",
+				"artwork.weight",
+				"artwork.condition",
+				"artwork.category",
+				"artwork.createdAt",
+				"artwork.stock",
+				"artwork.createdAt",
+				fn.agg<string[]>("array_agg", ["image.url"]).as("images"),
+				fn.agg<string[]>("array_agg", ["image.blurhash"]).as("blurhashes"),
+			])
+			.groupBy([
+				"artwork.id",
+				"artwork.title",
+				"artwork.description",
+				"artwork.price",
+				"artwork.dimensions",
+				"artwork.weight",
+				"artwork.condition",
+				"artwork.category",
+				"artwork.createdAt",
+				"artwork.stock",
+			])
+			.executeTakeFirst();
+
+		if (!artwork) {
+			throw notFound();
+		}
+
+		return {
+			success: true as const,
+			data: {
+				artwork: {
+					...artwork,
+					createdAt: new Date(artwork.createdAt).toISOString(),
+				},
 			},
 		};
 	});

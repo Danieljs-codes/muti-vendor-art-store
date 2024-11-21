@@ -43,6 +43,7 @@
 		"@uploadthing/react": "^7.1.1",
 		"better-auth": "^0.8.5-beta.1",
 		"blurhash": "^2.0.5",
+		"embla-carousel-autoplay": "^8.5.1",
 		"embla-carousel-react": "^8.5.1",
 		"framer-motion": "^11.11.17",
 		"justd-icons": "^1.7.6",
