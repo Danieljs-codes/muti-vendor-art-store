@@ -1,8 +1,10 @@
+import { Icons } from "@/components/icons";
 import { getArtistOrders$ } from "@server/artist";
 import { getArtistOrdersQueryOptions } from "@server/query-options";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/start";
-import { Badge, Card, Description, Heading, Table } from "ui";
+import { IconDotsVertical } from "justd-icons";
+import { Badge, Card, Description, Heading, Menu, Table } from "ui";
 
 // Test data with additional fields matching the API response
 const mockOrders = [
@@ -80,8 +82,44 @@ function RouteComponent() {
 			case "pending":
 				return "warning";
 			default:
-				return "danger";
+				return "info";
 		}
+	}
+
+	function renderMenuContent(status: "PENDING" | "SHIPPED" | "DELIVERED") {
+		if (status === "DELIVERED") return null;
+
+		return (
+			<Menu.Content respectScreen={false} showArrow placement="left top">
+				{status === "PENDING" && (
+					<>
+						<Menu.Item
+							className="text-sm"
+							onAction={() => console.log("Mark as shipped")}
+						>
+							<Icons.ShippingTruck />
+							Mark as shipped
+						</Menu.Item>
+						<Menu.Item
+							className="text-sm"
+							onAction={() => console.log("Mark as delivered")}
+						>
+							<Icons.PackageDelivered />
+							Mark as delivered
+						</Menu.Item>
+					</>
+				)}
+				{status === "SHIPPED" && (
+					<Menu.Item
+						className="text-sm"
+						onAction={() => console.log("Mark as delivered")}
+					>
+						<Icons.PackageDelivered />
+						Mark as delivered
+					</Menu.Item>
+				)}
+			</Menu.Content>
+		);
 	}
 
 	return (
@@ -103,6 +141,7 @@ function RouteComponent() {
 							<Table.Column>Platform Fee</Table.Column>
 							<Table.Column>Total</Table.Column>
 							<Table.Column>Status</Table.Column>
+							<Table.Column />
 						</Table.Header>
 						<Table.Body items={orders}>
 							{(order) => (
@@ -139,6 +178,16 @@ function RouteComponent() {
 											{order.shippingStatus.charAt(0).toUpperCase() +
 												order.shippingStatus.slice(1).toLowerCase()}
 										</Badge>
+									</Table.Cell>
+									<Table.Cell>
+										{order.shippingStatus !== "DELIVERED" && (
+											<Menu>
+												<Menu.Trigger>
+													<IconDotsVertical />
+												</Menu.Trigger>
+												{renderMenuContent(order.shippingStatus)}
+											</Menu>
+										)}
 									</Table.Cell>
 								</Table.Row>
 							)}
