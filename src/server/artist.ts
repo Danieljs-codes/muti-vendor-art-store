@@ -252,6 +252,7 @@ const getArtistArtworksSchema = z.object({
 export const getArtistArtworks$ = createServerFn()
 	.middleware([validateArtistMiddleware])
 	.validator(getArtistArtworksSchema)
+	// @ts-expect-error - Don't know why this is happening
 	.handler(async ({ context, data }) => {
 		const { artist } = context;
 		const { page, limit, search } = data;
@@ -271,7 +272,7 @@ export const getArtistArtworks$ = createServerFn()
 							])
 						: eb.val(true),
 				)
-				.select([
+				.select((eb) => [
 					"artwork.id",
 					"artwork.title",
 					"artwork.description",
@@ -282,8 +283,8 @@ export const getArtistArtworks$ = createServerFn()
 					"artwork.category",
 					"artwork.stock",
 					"artwork.createdAt",
-					db.fn.jsonAgg(sql.raw("image.url")).as("imageUrls"),
-					db.fn.jsonAgg(sql.raw("image.blurhash")).as("imageBlurhashes"),
+					eb.fn.jsonAgg(sql.raw("image.url")).as("imageUrls"),
+					eb.fn.jsonAgg(sql.raw("image.blurhash")).as("imageBlurhashes"),
 				])
 				.groupBy([
 					"artwork.id",
@@ -355,7 +356,6 @@ export const createArtistArtwork$ = createServerFn({
 	})
 	.handler(async ({ data, context }) => {
 		const { artist } = context;
-		console.log(data);
 
 		// Upload the images to uploadthing
 		const response = await utapi.uploadFiles(data.images);
@@ -590,8 +590,8 @@ export const getArtistDiscounts$ = createServerFn()
 		// Get all discounts associated with the artist's artworks
 		const discounts = await db
 			.selectFrom("discount")
-			.innerJoin("artwork", (join) =>
-				join.on("artwork.artistId", "=", artist.id)
+			.leftJoin("artwork", (join) =>
+				join.on("artwork.artistId", "=", artist.id),
 			)
 			.select([
 				"discount.id",
@@ -609,7 +609,7 @@ export const getArtistDiscounts$ = createServerFn()
 			])
 			.groupBy([
 				"discount.id",
-				"discount.code", 
+				"discount.code",
 				"discount.description",
 				"discount.percentage",
 				"discount.startDate",
@@ -627,17 +627,24 @@ export const getArtistDiscounts$ = createServerFn()
 			success: true as const,
 			data: {
 				discounts: discounts.map((discount) => ({
-					...discount,
+					id: discount.id,
+					code: discount.code,
+					description: discount.description,
+					percentage: discount.percentage,
 					startDate: new Date(discount.startDate).toISOString(),
 					endDate: new Date(discount.endDate).toISOString(),
 					createdAt: new Date(discount.createdAt).toISOString(),
+					minAmount: discount.minAmount,
+					maxUses: discount.maxUses,
+					usedCount: discount.usedCount,
+					isActive: discount.isActive,
 					appliedToArtworks: Number(discount.appliedToArtworks),
-					isValid: 
-						discount.isActive && 
+					isValid:
+						discount.isActive &&
 						new Date() >= new Date(discount.startDate) &&
 						new Date() <= new Date(discount.endDate) &&
-						(!discount.maxUses || discount.usedCount < discount.maxUses)
-				}))
-			}
+						(!discount.maxUses || discount.usedCount < discount.maxUses),
+				})),
+			},
 		};
 	});

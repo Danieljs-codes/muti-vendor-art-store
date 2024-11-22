@@ -1,14 +1,15 @@
 import { Icons } from "@/components/icons";
+import { NewDiscountModal } from "@/components/new-discount-modal";
 import { Table } from "@/components/ui/table";
-import { mockDiscounts } from "@/mocks/discount-data";
 import { formatDate } from "@/utils/misc";
 import { useSuspenseQueryDeferred } from "@/utils/use-suspense-query-deferred";
 import { getArtistDiscounts$ } from "@server/artist";
 import { getArtistDiscountsQueryOptions } from "@server/query-options";
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/start";
 import { IconPencilBox, IconTrash } from "justd-icons";
-import { Badge, Description, Heading, buttonStyles } from "ui";
+import { useState } from "react";
+import { Badge, Button, Card, Description, Heading, buttonStyles } from "ui";
 
 export const Route = createFileRoute(
 	"/_dashboard-layout-id/dashboard/discounts",
@@ -19,13 +20,14 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
+	const [isModalOpen, setIsModalOpen] = useState(false);
 	const getArtistDiscount = useServerFn(getArtistDiscounts$);
-	const { data } = useSuspenseQueryDeferred({
+	const {
+		data: { discounts },
+	} = useSuspenseQueryDeferred({
 		...getArtistDiscountsQueryOptions(),
 		queryFn: async () => await getArtistDiscount(),
 	});
-
-	const discounts = mockDiscounts;
 
 	return (
 		<div className="space-y-6">
@@ -36,17 +38,18 @@ function RouteComponent() {
 						Create and manage discount codes for your artworks
 					</Description>
 				</div>
-				<Link
-					className={buttonStyles({ shape: "circle", size: "small" })}
-					// to="/dashboard/discounts/new"
+				<Button
+					size="small"
+					shape="circle"
+					onPress={() => setIsModalOpen(true)}
 				>
 					<Icons.Discount />
 					Create Discount
-				</Link>
+				</Button>
 			</div>
 
-			<div className="rounded-md border">
-				<Table>
+			<Card>
+				<Table aria-label="Discounts">
 					<Table.Header>
 						<Table.Column isRowHeader>Code</Table.Column>
 						<Table.Column>Description</Table.Column>
@@ -56,9 +59,22 @@ function RouteComponent() {
 						<Table.Column>Status</Table.Column>
 						<Table.Column>Actions</Table.Column>
 					</Table.Header>
-					<Table.Body items={discounts}>
+					<Table.Body
+						items={discounts}
+						renderEmptyState={() => (
+							<div className="flex flex-col items-center justify-center p-4">
+								<p className="text-fg text-base mb-1 font-semibold">
+									No discounts found
+								</p>
+								<p className="text-muted-fg text-sm text-center max-w-[350px] text-pretty">
+									You haven't created any discounts yet. Start by creating your
+									first discount code.
+								</p>
+							</div>
+						)}
+					>
 						{(discount) => (
-							<Table.Row key={discount.id}>
+							<Table.Row id={discount.id}>
 								<Table.Cell>
 									<code className="rounded bg-muted px-2 py-1">
 										{discount.code}
@@ -112,7 +128,8 @@ function RouteComponent() {
 						)}
 					</Table.Body>
 				</Table>
-			</div>
+			</Card>
+			<NewDiscountModal isOpen={isModalOpen} onOpenChange={setIsModalOpen} />
 		</div>
 	);
 }

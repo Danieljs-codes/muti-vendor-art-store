@@ -66,6 +66,7 @@ export const getArtistArtworkQueryOptions = ({
 			});
 			return res;
 		},
+		// @ts-expect-error - I need to fix it in src/sever/artist.ts
 		select: (data) => data.data,
 	});
 

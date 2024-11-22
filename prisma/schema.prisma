@@ -170,8 +170,8 @@ model discount {
   code        String      @unique
   description String
   percentage  Float
-  startDate   DateTime    @db.Date
-  endDate     DateTime    @db.Date
+  startDate   DateTime   @db.Date
+  endDate     DateTime   @db.Date
   minAmount   Float? // Minimum order amount for discount to apply
   maxUses     Int? // Maximum number of times the discount can be used
   usedCount   Int         @default(0) // Track how many times code has been used

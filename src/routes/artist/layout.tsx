@@ -15,6 +15,7 @@ import {
 	IconSun,
 } from "justd-icons";
 import { useTheme } from "next-themes";
+import { useEffect } from "react";
 import { Avatar, Button, Menu, SearchField, Separator, Sidebar } from "ui";
 
 export const Route = createFileRoute("/_dashboard-layout-id")({
@@ -23,8 +24,10 @@ export const Route = createFileRoute("/_dashboard-layout-id")({
 
 		return { artist, user };
 	},
-	loader: async ({ context: { queryClient } }) => {
+	loader: async ({ context: { queryClient, user, artist } }) => {
 		queryClient.ensureQueryData(getArtistPendingOrdersQueryOptions());
+
+		return { user, artist };
 	},
 	component: RouteComponent,
 });

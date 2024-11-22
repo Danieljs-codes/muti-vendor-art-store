@@ -1,3 +1,4 @@
+import type { DateValue } from "react-aria";
 import { z } from "zod";
 import { ARTWORK_CATEGORIES, ARTWORK_CONDITIONS } from "./misc";
 
@@ -67,7 +68,6 @@ const stockSchema = z
 	})
 	.refine(
 		(data) => {
-			console.log(data);
 			if (data.isUnlimitedStock) return true;
 			return typeof data.stock === "number" && data.stock > 0;
 		},
@@ -146,4 +146,49 @@ export const createArtworkFormSchema = z.object({
 		.array(z.instanceof(File))
 		.min(2, { message: "At least 2 images are required" })
 		.max(4, { message: "Maximum of 4 images allowed" }),
+});
+
+// TODO: This has to be @internationlized/date
+export const createDiscountSchema = z.object({
+	code: z
+		.string()
+		.min(3, "Code must be at least 3 characters")
+		.max(50, "Code must be less than 50 characters")
+		.regex(
+			/^[A-Z0-9_-]+$/,
+			"Code must contain only uppercase letters, numbers, underscores and dashes",
+		),
+	description: z
+		.string()
+		.min(3, "Description must be at least 3 characters")
+		.max(255, "Description must be less than 255 characters"),
+	discountPercent: z
+		.number()
+		.min(1, "Discount must be at least 1%")
+		.max(100, "Discount cannot exceed 100%"),
+	maxUses: z.number().optional(),
+	validityPeriod: z
+		.object({
+			startDate: z.custom<DateValue>(),
+			endDate: z.custom<DateValue>(),
+		})
+		.refine(
+			(data) => {
+				if (!data.startDate || !data.endDate) return false;
+
+				return true;
+			},
+			{
+				message: "Validity period is required",
+			},
+		)
+		.refine(
+			(data) => {
+				if (!data.startDate || !data.endDate) return false;
+				return data.endDate.compare(data.startDate) > 0;
+			},
+			{
+				message: "End date must be after start date",
+			},
+		),
 });

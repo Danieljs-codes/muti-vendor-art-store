@@ -11,8 +11,11 @@ import { createMiddleware, createServerFn } from "@tanstack/start";
 import { APIError } from "better-auth/api";
 import { getWebRequest, setResponseHeader } from "vinxi/http";
 import { z } from "zod";
-import { validateUserMiddleware } from "./middlewares/auth"
-import { maybeArtistMiddleware } from "./middlewares/artist"
+import { validateUserMiddleware } from "./middlewares/auth";
+import {
+	maybeArtistMiddleware,
+	validateArtistMiddleware,
+} from "./middlewares/artist";
 import { db } from "./database";
 
 export const signIn$ = createServerFn({
@@ -214,19 +217,9 @@ export const validateCreateArtistAccess$ = createServerFn({
 export const validateArtistDashboardAccess$ = createServerFn({
 	method: "GET",
 })
-	.middleware([maybeArtistMiddleware])
+	.middleware([validateArtistMiddleware])
 	.handler(async ({ context }) => {
 		const { artist, user } = context;
-
-		if (!artist) {
-			throw await setCookieAndRedirect({
-				data: {
-					intent: "error",
-					message: "Artist profile not found",
-					redirectTo: "/",
-				},
-			});
-		}
 
 		return {
 			artist: omit(artist, ["createdAt", "updatedAt"]),

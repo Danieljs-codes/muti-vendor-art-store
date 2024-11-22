@@ -12,50 +12,6 @@ import { toast } from "sonner";
 import { Badge, Card, Description, Heading, Menu, Table } from "ui";
 
 // Test data with additional fields matching the API response
-const mockOrders = [
-	{
-		id: "ORD-001",
-		customerName: "John Doe",
-		customerEmail: "john@example.com",
-		quantity: 2,
-		price: "$75.00",
-		finalPrice: "$150.00",
-		platformFee: "$15.00",
-		title: "Abstract Sunset",
-		description: "Beautiful abstract painting",
-		shippingStatus: "PENDING" as const,
-		createdAt: new Date().toISOString(),
-		totalPrice: "$165.00",
-	},
-	{
-		id: "ORD-002",
-		customerName: "Jane Smith",
-		customerEmail: "jane@example.com",
-		quantity: 1,
-		price: "$75.00",
-		finalPrice: "$75.00",
-		platformFee: "$7.50",
-		title: "Ocean Waves",
-		description: "Serene ocean landscape",
-		shippingStatus: "SHIPPED" as const,
-		createdAt: new Date().toISOString(),
-		totalPrice: "$82.50",
-	},
-	{
-		id: "ORD-003",
-		customerName: "Bob Wilson",
-		customerEmail: "bob@example.com",
-		quantity: 3,
-		price: "$75.00",
-		finalPrice: "$225.00",
-		platformFee: "$22.50",
-		title: "Mountain Peak",
-		description: "Majestic mountain view",
-		shippingStatus: "DELIVERED" as const,
-		createdAt: new Date().toISOString(),
-		totalPrice: "$247.50",
-	},
-];
 
 export const Route = createFileRoute("/_dashboard-layout-id/dashboard/orders")({
 	loader: ({ context }) => {
@@ -195,11 +151,9 @@ function RouteComponent() {
 									<p className="text-fg text-base mb-1 font-semibold">
 										No orders found
 									</p>
-									<p className="text-muted-fg text-sm text-center">
-										<Balancer className="max-w-[350px]">
-											You don't have any orders yet. Orders will appear here
-											once customers purchase your artworks.
-										</Balancer>
+									<p className="text-muted-fg text-sm text-center max-w-[350px]">
+										You don't have any orders yet. Orders will appear here once
+										customers purchase your artworks.
 									</p>
 								</div>
 							)}
