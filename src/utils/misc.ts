@@ -76,3 +76,11 @@ export const camelCaseToTitleCase = (str: string) => {
 export const convertNairaToKobo = (amount: number) => {
 	return amount * 100;
 };
+
+export function formatDate(date: string) {
+	return new Date(date).toLocaleDateString("en-US", {
+		year: "numeric",
+		month: "short",
+		day: "numeric",
+	});
+}

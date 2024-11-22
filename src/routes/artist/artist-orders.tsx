@@ -173,7 +173,7 @@ function RouteComponent() {
 			</div>
 			<div className="mt-6">
 				<Card>
-					<Table>
+					<Table aria-label="Orders">
 						<Table.Header>
 							<Table.Column>Order ID</Table.Column>
 							<Table.Column>Date</Table.Column>
@@ -181,8 +181,10 @@ function RouteComponent() {
 							<Table.Column isRowHeader>Customer</Table.Column>
 							<Table.Column>Quantity</Table.Column>
 							<Table.Column>Unit Price</Table.Column>
+							<Table.Column>Discount</Table.Column>
 							<Table.Column>Platform Fee</Table.Column>
-							<Table.Column>Total</Table.Column>
+							<Table.Column>Final Price</Table.Column>
+							<Table.Column>Amount Received</Table.Column>
 							<Table.Column>Status</Table.Column>
 							<Table.Column />
 						</Table.Header>
@@ -203,7 +205,7 @@ function RouteComponent() {
 							)}
 						>
 							{(order) => (
-								<Table.Row key={order.id}>
+								<Table.Row id={order.id}>
 									<Table.Cell>{order.id}</Table.Cell>
 									<Table.Cell>
 										{new Date(order.createdAt).toLocaleDateString()}
@@ -226,8 +228,16 @@ function RouteComponent() {
 									</Table.Cell>
 									<Table.Cell>{order.quantity}</Table.Cell>
 									<Table.Cell>{order.price}</Table.Cell>
+									<Table.Cell>
+										{order.discountAmount ? order.discountAmount : "Nil"}
+									</Table.Cell>
 									<Table.Cell>{order.platformFee}</Table.Cell>
-									<Table.Cell>{order.totalPrice}</Table.Cell>
+									<Table.Cell>{order.finalPrice}</Table.Cell>
+									<Table.Cell>
+										{(
+											Number(order.finalPrice) - Number(order.platformFee)
+										).toFixed(2)}
+									</Table.Cell>
 									<Table.Cell>
 										<Badge
 											intent={getStatusBadgeIntent(order.shippingStatus)}

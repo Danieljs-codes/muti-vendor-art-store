@@ -20,6 +20,7 @@ import { Route as authSignInImport } from './routes/auth/sign-in'
 import { Route as indexImport } from './routes/index'
 import { Route as artistOverviewImport } from './routes/artist/overview'
 import { Route as artistArtistOrdersImport } from './routes/artist/artist-orders'
+import { Route as artistDiscountsImport } from './routes/artist/discounts'
 import { Route as artistArtworkNewImport } from './routes/artist/artwork-new'
 import { Route as artistArtworkLayoutImport } from './routes/artist/artwork-layout'
 import { Route as artistArtworkDetailsImport } from './routes/artist/artwork-details'
@@ -75,6 +76,12 @@ const artistOverviewRoute = artistOverviewImport.update({
 const artistArtistOrdersRoute = artistArtistOrdersImport.update({
   id: '/dashboard/orders',
   path: '/dashboard/orders',
+  getParentRoute: () => artistLayoutRoute,
+} as any)
+
+const artistDiscountsRoute = artistDiscountsImport.update({
+  id: '/dashboard/discounts',
+  path: '/dashboard/discounts',
   getParentRoute: () => artistLayoutRoute,
 } as any)
 
@@ -169,6 +176,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof artistArtworkNewImport
       parentRoute: typeof artistLayoutImport
     }
+    '/_dashboard-layout-id/dashboard/discounts': {
+      id: '/_dashboard-layout-id/dashboard/discounts'
+      path: '/dashboard/discounts'
+      fullPath: '/dashboard/discounts'
+      preLoaderRoute: typeof artistDiscountsImport
+      parentRoute: typeof artistLayoutImport
+    }
     '/_dashboard-layout-id/dashboard/orders': {
       id: '/_dashboard-layout-id/dashboard/orders'
       path: '/dashboard/orders'
@@ -232,6 +246,7 @@ const artistArtworkLayoutRouteWithChildren =
 interface artistLayoutRouteChildren {
   artistArtworkLayoutRoute: typeof artistArtworkLayoutRouteWithChildren
   artistArtworkNewRoute: typeof artistArtworkNewRoute
+  artistDiscountsRoute: typeof artistDiscountsRoute
   artistArtistOrdersRoute: typeof artistArtistOrdersRoute
   artistOverviewRoute: typeof artistOverviewRoute
 }
@@ -239,6 +254,7 @@ interface artistLayoutRouteChildren {
 const artistLayoutRouteChildren: artistLayoutRouteChildren = {
   artistArtworkLayoutRoute: artistArtworkLayoutRouteWithChildren,
   artistArtworkNewRoute: artistArtworkNewRoute,
+  artistDiscountsRoute: artistDiscountsRoute,
   artistArtistOrdersRoute: artistArtistOrdersRoute,
   artistOverviewRoute: artistOverviewRoute,
 }
@@ -266,6 +282,7 @@ export interface FileRoutesByFullPath {
   '/sign-up': typeof authSignUpRoute
   '/dashboard/artworks': typeof artistArtworkLayoutRouteWithChildren
   '/dashboard/artworks-new': typeof artistArtworkNewRoute
+  '/dashboard/discounts': typeof artistDiscountsRoute
   '/dashboard/orders': typeof artistArtistOrdersRoute
   '/dashboard/overview': typeof artistOverviewRoute
   '/dashboard/artworks/': typeof artistArtworkRoute
@@ -279,6 +296,7 @@ export interface FileRoutesByTo {
   '/sign-in': typeof authSignInRoute
   '/sign-up': typeof authSignUpRoute
   '/dashboard/artworks-new': typeof artistArtworkNewRoute
+  '/dashboard/discounts': typeof artistDiscountsRoute
   '/dashboard/orders': typeof artistArtistOrdersRoute
   '/dashboard/overview': typeof artistOverviewRoute
   '/dashboard/artworks': typeof artistArtworkRoute
@@ -296,6 +314,7 @@ export interface FileRoutesById {
   '/_auth-layout-id/sign-up': typeof authSignUpRoute
   '/_dashboard-layout-id/dashboard/artworks': typeof artistArtworkLayoutRouteWithChildren
   '/_dashboard-layout-id/dashboard/artworks-new': typeof artistArtworkNewRoute
+  '/_dashboard-layout-id/dashboard/discounts': typeof artistDiscountsRoute
   '/_dashboard-layout-id/dashboard/orders': typeof artistArtistOrdersRoute
   '/_dashboard-layout-id/dashboard/overview': typeof artistOverviewRoute
   '/_dashboard-layout-id/dashboard/artworks/': typeof artistArtworkRoute
@@ -312,6 +331,7 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/dashboard/artworks'
     | '/dashboard/artworks-new'
+    | '/dashboard/discounts'
     | '/dashboard/orders'
     | '/dashboard/overview'
     | '/dashboard/artworks/'
@@ -324,6 +344,7 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/dashboard/artworks-new'
+    | '/dashboard/discounts'
     | '/dashboard/orders'
     | '/dashboard/overview'
     | '/dashboard/artworks'
@@ -339,6 +360,7 @@ export interface FileRouteTypes {
     | '/_auth-layout-id/sign-up'
     | '/_dashboard-layout-id/dashboard/artworks'
     | '/_dashboard-layout-id/dashboard/artworks-new'
+    | '/_dashboard-layout-id/dashboard/discounts'
     | '/_dashboard-layout-id/dashboard/orders'
     | '/_dashboard-layout-id/dashboard/overview'
     | '/_dashboard-layout-id/dashboard/artworks/'
@@ -388,6 +410,7 @@ export const routeTree = rootRoute
       "children": [
         "/_dashboard-layout-id/dashboard/artworks",
         "/_dashboard-layout-id/dashboard/artworks-new",
+        "/_dashboard-layout-id/dashboard/discounts",
         "/_dashboard-layout-id/dashboard/orders",
         "/_dashboard-layout-id/dashboard/overview"
       ]
@@ -423,6 +446,10 @@ export const routeTree = rootRoute
     },
     "/_dashboard-layout-id/dashboard/artworks-new": {
       "filePath": "artist/artwork-new.tsx",
+      "parent": "/_dashboard-layout-id"
+    },
+    "/_dashboard-layout-id/dashboard/discounts": {
+      "filePath": "artist/discounts.tsx",
       "parent": "/_dashboard-layout-id"
     },
     "/_dashboard-layout-id/dashboard/orders": {

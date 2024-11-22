@@ -490,20 +490,22 @@ export const getArtistOrders$ = createServerFn()
 			.innerJoin("orderItem", "orderItem.orderId", "order.id")
 			.innerJoin("artwork", "artwork.id", "orderItem.artworkId")
 			.innerJoin("user", "user.id", "order.userId")
+			.leftJoin("discount", "discount.id", "orderItem.discountId")
 			.where("artwork.artistId", "=", artist.id)
 			.select([
 				"order.id",
-				"order.totalPrice",
 				"order.shippingStatus",
 				"orderItem.quantity",
 				"orderItem.price",
 				"orderItem.finalPrice",
 				"orderItem.platformFee",
+				"orderItem.discountAmount",
 				"orderItem.createdAt",
 				"artwork.title",
 				"artwork.description",
 				"user.name as customerName",
 				"user.email as customerEmail",
+				"discount.code as discountCode",
 			])
 			.orderBy("orderItem.createdAt", "desc")
 			.execute();
@@ -577,5 +579,65 @@ export const updateOrderShippingStatus$ = createServerFn()
 				orderId,
 				status,
 			},
+		};
+	});
+
+export const getArtistDiscounts$ = createServerFn()
+	.middleware([validateArtistMiddleware])
+	.handler(async ({ context }) => {
+		const { artist } = context;
+
+		// Get all discounts associated with the artist's artworks
+		const discounts = await db
+			.selectFrom("discount")
+			.innerJoin("artwork", (join) =>
+				join.on("artwork.artistId", "=", artist.id)
+			)
+			.select([
+				"discount.id",
+				"discount.code",
+				"discount.description",
+				"discount.percentage",
+				"discount.startDate",
+				"discount.endDate",
+				"discount.minAmount",
+				"discount.maxUses",
+				"discount.usedCount",
+				"discount.isActive",
+				"discount.createdAt",
+				db.fn.count("artwork.id").as("appliedToArtworks"),
+			])
+			.groupBy([
+				"discount.id",
+				"discount.code", 
+				"discount.description",
+				"discount.percentage",
+				"discount.startDate",
+				"discount.endDate",
+				"discount.minAmount",
+				"discount.maxUses",
+				"discount.usedCount",
+				"discount.isActive",
+				"discount.createdAt",
+			])
+			.orderBy("discount.createdAt", "desc")
+			.execute();
+
+		return {
+			success: true as const,
+			data: {
+				discounts: discounts.map((discount) => ({
+					...discount,
+					startDate: new Date(discount.startDate).toISOString(),
+					endDate: new Date(discount.endDate).toISOString(),
+					createdAt: new Date(discount.createdAt).toISOString(),
+					appliedToArtworks: Number(discount.appliedToArtworks),
+					isValid: 
+						discount.isActive && 
+						new Date() >= new Date(discount.startDate) &&
+						new Date() <= new Date(discount.endDate) &&
+						(!discount.maxUses || discount.usedCount < discount.maxUses)
+				}))
+			}
 		};
 	});

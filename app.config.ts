@@ -23,6 +23,7 @@ const routes = rootRoute("root.tsx", [
 		]),
 		route("dashboard/orders", "artist/artist-orders.tsx"),
 		route("dashboard/artworks-new", "artist/artwork-new.tsx"),
+		route("dashboard/discounts", "artist/discounts.tsx"),
 	]),
 ]);
 

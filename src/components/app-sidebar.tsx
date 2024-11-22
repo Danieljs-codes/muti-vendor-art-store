@@ -3,6 +3,7 @@
 import type * as React from "react";
 
 import type { authClient } from "@/utils/auth-client";
+import { useLocation } from "@tanstack/react-router";
 import {
 	IconChevronLgDown,
 	IconCirclePerson,
@@ -17,7 +18,6 @@ import { useTheme } from "next-themes";
 import { Avatar, Button, Link, Menu, Sidebar } from "ui";
 import { Icons } from "./icons";
 import { Logo } from "./logo";
-import { useLocation } from "@tanstack/react-router";
 
 type User = Omit<
 	(typeof authClient.$Infer.Session)["user"],
@@ -79,7 +79,7 @@ export function AppSidebar({
 					</Sidebar.Item>
 					<Sidebar.Item
 						icon={Icons.Discount}
-						href="/"
+						href="/dashboard/discounts"
 						isCurrent={pathname.includes("discounts")}
 					>
 						Discounts

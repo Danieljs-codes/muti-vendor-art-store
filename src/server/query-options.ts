@@ -2,6 +2,7 @@ import { queryOptions } from "@tanstack/react-query";
 import {
 	getArtistArtworks$,
 	getArtistDashboardStats$,
+	getArtistDiscounts$,
 	getArtistOrders$,
 	getArtistPendingOrders$,
 	getArtistRecentSales$,
@@ -89,5 +90,12 @@ export const getArtistOrdersQueryOptions = () =>
 			const res = await getArtistOrders$();
 			return res;
 		},
+		select: (data) => data.data,
+	});
+
+export const getArtistDiscountsQueryOptions = () =>
+	queryOptions({
+		queryKey: ["artist-discounts"],
+		queryFn: async () => await getArtistDiscounts$(),
 		select: (data) => data.data,
 	});
